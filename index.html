@@ -1,0 +1,1073 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chog: No Excuses</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@500;700;800&display=swap">
+<style>
+/* Layout: one centered phone-width column. Home (pick a Chog) -> Sheet (traits become stats) -> Play -> Score card. Single night-purple look by choice, taken from the @ChogNFT avatar and banner. */
+:root {
+  --ink: #120b2e;
+  --panel: #1c1440;
+  --panel2: #251a56;
+  --line: #3b3270;
+  --text: #f3eeff;
+  --muted: #aaa1d8;
+  --purple: #8b5cf6;
+  --blue: #5fb4e6;
+  --orange: #ff9a3d;
+  --pink: #ff6fa8;
+  --danger: #ff5a6e;
+  --good: #6fe39a;
+  --font-display: "Baloo 2", "Trebuchet MS", system-ui, sans-serif;
+  --font-body: "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { background: var(--ink); }
+body {
+  margin: 0; color: var(--text); font-family: var(--font-body); font-size: 15px; line-height: 1.5;
+  padding-block: 18px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  background: radial-gradient(900px 500px at 80% -10%, #2a1a6b55, transparent), var(--ink);
+}
+main { max-width: 460px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 800; margin: 0; text-wrap: balance; line-height: 1.1; }
+h1 { font-size: 40px; color: #fff; letter-spacing: .01em; }
+h1 span { color: var(--purple); }
+h2 { font-size: 20px; }
+h3 { font-size: 15px; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; font-weight: 700; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+.small { font-size: 12.5px; }
+.stack { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.panel { background: var(--panel); border: 2px solid var(--line); border-radius: 14px; padding: 14px; min-width: 0; }
+button {
+  font: inherit; font-family: var(--font-display); font-weight: 700; font-size: 16px;
+  background: var(--purple); color: #fff; border: 0; border-radius: 12px; padding: 10px 16px; cursor: pointer;
+  box-shadow: 0 4px 0 #4b2db0; transition: transform .06s, box-shadow .06s; min-height: 44px;
+}
+button:hover { filter: brightness(1.08); }
+button:active { transform: translateY(3px); box-shadow: 0 1px 0 #4b2db0; }
+button.alt { background: var(--panel2); box-shadow: 0 4px 0 #130c33; }
+button.alt:active { box-shadow: 0 1px 0 #130c33; }
+button.hot { background: var(--orange); color: #2d1600; box-shadow: 0 4px 0 #a45512; }
+button.hot:active { box-shadow: 0 1px 0 #a45512; }
+button[disabled] { opacity: .45; cursor: not-allowed; filter: none; }
+button[aria-pressed="true"].tog { background: var(--blue); color: #06213a; box-shadow: 0 4px 0 #2c7da8; }
+button:focus-visible, input:focus-visible, .card:focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; }
+input {
+  font: inherit; background: #0d0724; color: var(--text); border: 2px solid var(--line); border-radius: 10px;
+  padding: 10px 12px; min-height: 44px; min-width: 0; width: 100%;
+}
+.lookup { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; }
+.status { min-height: 22px; color: var(--blue); font-weight: 700; }
+.cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.card {
+  background: var(--panel); border: 2px solid var(--line); border-radius: 14px; padding: 10px; text-align: left; color: inherit;
+  display: flex; flex-direction: column; gap: 4px; min-width: 0; cursor: pointer; box-shadow: none; font-family: var(--font-body);
+}
+.card:hover { border-color: var(--r, var(--purple)); filter: none; }
+.card canvas { width: 100%; height: auto; aspect-ratio: 1; border-radius: 10px; background: #0d0724; display: block; }
+.card .nm { font-family: var(--font-display); font-weight: 700; font-size: 15px; overflow-wrap: anywhere; line-height: 1.2; }
+.card .tr { color: var(--r, var(--muted)); font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: .1em; }
+.cast { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.cast > div { display: flex; gap: 8px; align-items: center; background: var(--panel); border: 2px solid var(--line); border-radius: 12px; padding: 8px; min-width: 0; }
+.cast canvas { width: 52px; height: 52px; flex: none; }
+.cast b { font-family: var(--font-display); display: block; line-height: 1.1; }
+.cast span { color: var(--muted); font-size: 12px; line-height: 1.25; display: block; }
+
+/* sheet */
+.hero { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 14px; align-items: start; }
+@media (max-width: 400px) { .hero { grid-template-columns: 1fr; } }
+.hero canvas { width: 150px; height: 150px; border-radius: 14px; background: #0d0724; border: 3px solid var(--r, var(--line)); box-shadow: 0 0 26px -6px var(--r, transparent); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { background: var(--panel2); border-radius: 999px; padding: 3px 10px; font-size: 12px; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.chip b { color: var(--muted); font-weight: 700; }
+.badge { display: inline-block; font-family: var(--font-display); font-weight: 800; font-size: 13px; padding: 2px 10px; border-radius: 999px; background: var(--r, var(--purple)); color: #14092e; }
+.badge.ok { background: var(--good); }
+.badge.pv { background: var(--panel2); color: var(--muted); }
+.bars { display: grid; gap: 8px; }
+.bar { display: grid; grid-template-columns: 78px minmax(0, 1fr) 24px; gap: 8px; align-items: center; font-size: 13px; }
+.bar i { display: block; height: 10px; border-radius: 6px; background: #0d0724; overflow: hidden; }
+.bar i em { display: block; height: 100%; background: linear-gradient(90deg, var(--purple), var(--blue)); border-radius: 6px; }
+.bar span:last-child { text-align: right; font-variant-numeric: tabular-nums; font-weight: 800; }
+ul.plain { list-style: none; padding: 0; margin: 0; display: grid; gap: 4px; font-size: 13.5px; }
+
+select { font: inherit; background: #0d0724; color: var(--text); border: 2px solid var(--line); border-radius: 10px; padding: 8px 10px; min-height: 44px; width: 100%; min-width: 0; }
+label.f { display: grid; gap: 4px; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; font-weight: 700; }
+.alters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.alters button { min-height: 48px; font-size: 14px; padding: 6px 10px; text-align: left; line-height: 1.15; }
+.alters small { display: block; font-family: var(--font-body); font-weight: 700; font-size: 11px; opacity: .85; margin-top: 2px; }
+/* play */
+.hud { display: flex; justify-content: space-between; align-items: flex-end; gap: 8px; font-family: var(--font-display); font-weight: 800; }
+.hud > div { display: flex; flex-direction: column; min-width: 0; }
+.hud .big { font-size: 26px; line-height: 1; font-variant-numeric: tabular-nums; }
+.hud .lbl { font-size: 11px; letter-spacing: .12em; color: var(--muted); text-transform: uppercase; font-weight: 700; }
+.hud .r { align-items: flex-end; }
+#hearts { color: var(--danger); letter-spacing: 3px; font-size: 20px; line-height: 1; }
+.stage { position: relative; border: 3px solid var(--line); border-radius: 14px; overflow: hidden; background: #0b0820; }
+canvas#game { display: block; width: 100%; height: auto; touch-action: none; }
+.overlay { position: absolute; inset: 0; background: rgba(12,7,32,.92); display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 12px; padding: 14px; text-align: center; overflow-y: auto; }
+.abil { position: relative; overflow: hidden; width: 100%; background: var(--panel2); box-shadow: 0 4px 0 #130c33; text-align: center; }
+.abil i { position: absolute; inset: 0 auto 0 0; width: 0; background: #4b2db0; z-index: 0; transition: width .15s; }
+.abil span { position: relative; z-index: 1; }
+.abil.ready { background: var(--orange); color: #2d1600; box-shadow: 0 4px 0 #a45512; animation: pulse .7s infinite alternate; }
+.abil.ready i { display: none; }
+.abil.fire { background: #3b1a14; box-shadow: 0 4px 0 #1d0c09; }
+.abil.fire i { background: #ea580c; transition: none; }
+.abil.fire span { text-shadow: 0 1px 2px rgba(0,0,0,.6); }
+.btnrow { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 10px; }
+.hero2 { position: relative; border-radius: 14px; overflow: hidden; border: 3px solid var(--line); background: #0b0820; }
+.hero2 canvas { display: block; width: 100%; height: auto; }
+.heroCap { position: absolute; left: 0; right: 0; bottom: 0; padding: 30px 14px 10px; background: linear-gradient(to top, rgba(10,6,28,.92), rgba(10,6,28,0)); display: flex; flex-direction: column; gap: 2px; text-shadow: 0 2px 8px rgba(0,0,0,.9); pointer-events: none; }
+.heroCap b { font-family: var(--font-display); font-size: 22px; line-height: 1.1; }
+.choices { display: grid; gap: 10px; }
+.choice { width: 100%; text-align: left; display: grid; gap: 2px; padding: 12px 14px; }
+.choice small { font-family: var(--font-body); font-weight: 700; font-size: 12.5px; opacity: .85; line-height: 1.3; }
+.steps { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+.steps b { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--purple); color: #fff; font-size: 12px; margin-right: 2px; }
+@keyframes pulse { to { filter: brightness(1.18); } }
+.cardwrap canvas { width: 100%; max-width: 300px; height: auto; border-radius: 14px; display: block; margin: 0 auto; }
+footer { color: var(--muted); font-size: 12px; text-align: center; }
+@media (prefers-reduced-motion: reduce) { button, .abil.ready { transition: none; animation: none; } }
+</style>
+</head>
+<body>
+<main>
+  <header class="stack" style="gap:6px">
+    <h1 id="gameName">Chog <span>Catcher</span></h1>
+    <p class="muted">your chog's traits decide how you play. catch the loot, dodge the rug wraith, keep your streak alive.</p>
+    <p class="steps small muted"><span><b>1</b>pick a chog</span> <span>›</span> <span><b>2</b>choose your style</span> <span>›</span> <span><b>3</b>play</span></p>
+  </header>
+
+  <!-- HOME -->
+  <section id="home" class="stack">
+    <div id="challengeBanner" class="panel stack" hidden style="border-color:var(--orange)">
+      <h3>friend challenge</h3>
+      <p id="challengeText"></p>
+      <button id="challengePlay" type="button" class="hot">Accept the challenge</button>
+    </div>
+    <div class="hero2">
+      <canvas id="heroCv" width="720" height="400" aria-label="Chog showcase: your Chog in the fire with Monad coins and fireballs"></canvas>
+      <div class="heroCap"><b id="heroName"></b><span id="heroInfo" class="small"></span></div>
+    </div>
+    <div class="panel stack">
+      <h2>how do you want to play?</h2>
+      <div class="choices">
+        <button id="btnPlayNow" type="button" class="choice hot"><b>Play now</b><small>no wallet needed. try the demo with a sample chog.</small></button>
+        <button id="btnWallet" type="button" class="choice alt"><b>Use my Chog</b><small>connect a wallet to find your Chog Genesis and unlock progress. read-only.</small></button>
+        <button id="btnGuest" type="button" class="choice alt"><b>Pick a sample chog</b><small>ten guest chogs, two for each tier.</small></button>
+        <button id="btnCreate" type="button" class="choice alt"><b>Create a chog</b><small>build your own guest chog.</small></button>
+      </div>
+      <p class="small muted">or look up a real Chog by its number:</p>
+      <form id="lookupForm" class="lookup" autocomplete="off">
+        <input id="tokenInput" type="number" inputmode="numeric" min="1" max="1969" placeholder="look up token # (1 to 1969)" aria-label="Chog Genesis token number">
+        <button type="submit" class="alt">Look up</button>
+      </form>
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+      <p class="small muted">read-only. this page never asks you to sign or send anything. it only reads public data from Monad.</p>
+    </div>
+    <div id="chogListWrap" hidden class="stack">
+      <h3>pick your chog</h3>
+      <div class="row" id="tierFilter" style="gap:6px"></div>
+      <div id="chogList" class="cards"></div>
+    </div>
+    <div class="stack">
+      <h3>the cast (original fan characters)</h3>
+      <div class="cast" id="cast"></div>
+      <p class="small muted">chog came from a failed ai experiment. prototype zero is what's left of it. the rug wraith is made of every rug ever pulled.</p>
+    </div>
+    <div class="panel stack">
+      <h3>beat a friend</h3>
+      <p class="small muted">got a challenge link or code from a friend? paste it to compare best scores. just for fun, not tamper-proof.</p>
+      <form id="cmpForm" class="lookup" autocomplete="off">
+        <input id="cmpInput" type="text" placeholder="paste a link or code" aria-label="Challenge link or code">
+        <button type="submit" class="alt">Compare</button>
+      </form>
+      <p id="cmpOut" class="status"></p>
+    </div>
+  </section>
+
+  <!-- SHEET -->
+  <section id="sheet" class="stack" hidden>
+    <div class="hero" id="heroBox">
+      <canvas id="sheetCanvas" width="300" height="300" aria-label="Your Chog"></canvas>
+      <div class="stack" style="gap:8px">
+        <h2 id="shName"></h2>
+        <button id="btnStart2" type="button" class="hot">Start run</button>
+        <div class="row" style="gap:6px"><span class="badge" id="shTier"></span><span class="badge" id="shOwn"></span></div>
+        <div class="row" style="gap:6px">
+          <button class="tog alt" id="artReal" type="button" aria-pressed="true" style="min-height:36px;padding:4px 12px;font-size:14px">real art</button>
+          <button class="tog alt" id="artOrig" type="button" aria-pressed="false" style="min-height:36px;padding:4px 12px;font-size:14px">original art</button>
+        </div>
+      </div>
+    </div>
+    <div class="panel stack">
+      <h3>how to play</h3>
+      <ul class="plain">
+        <li>• drag, or use the arrow keys, to move</li>
+        <li>• catch the purple coins and gems. dodge the wraith. you have 3 lives at most, and a heart brings one back</li>
+        <li>• press the fire button (or F) to burn wraiths</li>
+        <li>• press space, or the move button, when it's charged</li>
+      </ul>
+    </div>
+    <div class="panel stack">
+      <h3>traits</h3>
+      <div class="chips" id="shTraits"></div>
+    </div>
+    <div class="panel stack">
+      <h3>how your traits play</h3>
+      <div class="bars" id="shBars"></div>
+      <ul class="plain" id="shPerks"></ul>
+      <p class="small muted" id="shAbility"></p>
+    </div>
+    <div class="panel stack">
+      <h3>alter ego</h3>
+      <p class="small muted">who does your chog become this run? things you'd never do, he does happily. traits unlock them and your tier makes them stronger.</p>
+      <div class="alters" id="alterBox"></div>
+      <p class="small" id="alterDesc"></p>
+      <h3>dare (optional)</h3>
+      <div class="alters" id="dareBox"></div>
+      <p class="small" id="dareDesc"></p>
+    </div>
+    <div class="panel stack">
+      <h3>progress</h3>
+      <div class="bar" style="grid-template-columns: 78px minmax(0,1fr) auto"><span id="lvlText"></span><i><em id="xpBar" style="width:0"></em></i><span id="xpText" class="small muted"></span></div>
+      <p id="streakText"></p>
+      <button id="checkinBtn" type="button" class="hot">i'm still here</button>
+      <p id="questText" class="small muted"></p>
+      <p class="small muted">progress is saved on this device.</p>
+    </div>
+    <div class="row">
+      <button id="btnStart" type="button" class="hot" style="flex:1">Start run</button>
+      <button id="btnBack" type="button" class="alt">Back</button>
+    </div>
+  </section>
+
+  <!-- BUILDER -->
+  <section id="builder" class="stack" hidden>
+    <div class="panel stack">
+      <h2>create a chog</h2>
+      <p class="small muted">build a guest chog. it plays at common tier and is not an nft. real chog genesis owners get tier bonuses and alter egos that traits unlock.</p>
+      <canvas id="buildCanvas" width="300" height="300" style="width:200px;height:200px;border-radius:14px;background:#0d0724;border:3px solid var(--line);align-self:center" aria-label="Your custom Chog"></canvas>
+      <input id="buildName" type="text" maxlength="20" placeholder="name your chog" aria-label="Chog name">
+      <div id="buildFields" class="stack"></div>
+      <div class="row"><button id="buildUse" class="hot" type="button" style="flex:1">Use this chog</button><button id="buildBack" class="alt" type="button">Back</button></div>
+    </div>
+  </section>
+
+  <!-- PLAY -->
+  <section id="play" class="stack" hidden>
+    <div class="hud">
+      <div><span class="lbl">score</span><span class="big" id="score">0</span></div>
+      <div style="align-items:center"><span class="lbl">combo</span><span class="big" id="combo">x1</span></div>
+      <div class="r"><span class="lbl">lives</span><span id="hearts"></span></div>
+    </div>
+    <p id="dareLine" class="small muted" style="min-height:20px"></p>
+    <div class="stage">
+      <canvas id="game" width="360" height="520" aria-label="Game board"></canvas>
+      <div class="overlay" id="over" hidden></div>
+    </div>
+    <div class="btnrow">
+      <button id="abil" type="button" class="abil"><i id="abilFill"></i><span id="abilName"></span></button>
+      <button id="fireBtn" type="button" class="abil fire"><i id="fireFill"></i><span>fire (F)</span></button>
+    </div>
+    <div class="row" style="justify-content:space-between">
+      <span class="small muted">drag or arrows / A D to move. space = your move. F = fireball.</span>
+      <span style="display:flex;gap:8px"><button id="quitBtn" class="alt" type="button" style="min-height:34px;padding:2px 10px;font-size:13px">quit</button><button id="muteBtn" class="alt" type="button" style="min-height:34px;padding:2px 10px;font-size:13px">sound on</button></span>
+    </div>
+  </section>
+
+  <footer>unofficial fan game made for chogathon 2026. chog and chog genesis belong to the chog team.</footer>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ================= config ================= */
+  var GAME_NAME = "Chog: No Excuses";
+  var RPC = "https://rpc.monad.xyz";
+  var CONTRACT = "0xc96d31F8626c6D03Fae5dCD3d61e3FB9F4a73763";
+  var SUPPLY = 1969;
+  var GATEWAYS = ["https://gateway.pinata.cloud/ipfs/", "https://ipfs.io/ipfs/", "https://dweb.link/ipfs/"];
+  var TIERS = ["Common", "Uncommon", "Rare", "Epic", "Legendary"];
+  var TIER_COL = { Common: "#b9b2d8", Uncommon: "#6fe39a", Rare: "#4fb0ff", Epic: "#c178ff", Legendary: "#ffc83d" };
+
+  var $ = function (id) { return document.getElementById(id); };
+  document.title = GAME_NAME;
+  (function () { var p = GAME_NAME.split(" "), last = p.pop(); $("gameName").innerHTML = (p.length ? p.join(" ") + " " : "") + "<span>" + last + "</span>"; })();
+
+  /* ================= helpers ================= */
+  function hash(str) { var h = 2166136261; str = String(str); for (var i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function today() { return new Date().toISOString().slice(0, 10); }
+  function yesterday() { return new Date(Date.now() - 864e5).toISOString().slice(0, 10); }
+  function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function short(a) { return a.slice(0, 6) + "…" + a.slice(-4); }
+  function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+  function A(ch, k) { return String((ch.attrs && ch.attrs[k]) || ""); }
+  function tierIdx(ch) { var i = TIERS.indexOf(A(ch, "Tier")); return i < 0 ? 0 : i; }
+  function status(t) { $("status").textContent = t; }
+
+  /* ================= chain reads (read-only) ================= */
+  function pad(h) { return String(h).replace(/^0x/, "").toLowerCase().padStart(64, "0"); }
+  function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+  function rpcBatch(datas) {
+    var body = datas.map(function (d, i) { return { jsonrpc: "2.0", id: i, method: "eth_call", params: [{ to: CONTRACT, data: d }, "latest"] }; });
+    return fetch(RPC, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json(); })
+      .then(function (js) { var out = new Array(datas.length).fill(null); (Array.isArray(js) ? js : [js]).forEach(function (x) { if (x && x.result && x.result !== "0x") out[x.id] = x.result; }); return out; });
+  }
+  function decodeString(hex) {
+    var h = hex.replace(/^0x/, ""), len = parseInt(h.slice(64, 128), 16), bytes = h.slice(128, 128 + len * 2), s = "";
+    for (var i = 0; i < bytes.length; i += 2) s += String.fromCharCode(parseInt(bytes.substr(i, 2), 16));
+    try { return decodeURIComponent(escape(s)); } catch (e) { return s; }
+  }
+  function ipfsUrls(u) { if (u.indexOf("ipfs://") === 0) { var p = u.slice(7); return GATEWAYS.map(function (g) { return g + p; }); } return [u]; }
+  function fetchJSON(u) {
+    var urls = ipfsUrls(u), i = 0;
+    function next() {
+      if (i >= urls.length) return Promise.reject(new Error("metadata unreachable"));
+      var ctl = new AbortController(), t = setTimeout(function () { ctl.abort(); }, 9000);
+      return fetch(urls[i++], { signal: ctl.signal }).then(function (r) { clearTimeout(t); if (!r.ok) throw 0; return r.json(); }).catch(function () { clearTimeout(t); return next(); });
+    }
+    return next();
+  }
+  function loadImage(u) {
+    var urls = ipfsUrls(u), i = 0;
+    return new Promise(function (resolve) {
+      function next() {
+        if (i >= urls.length) return resolve(null);
+        var im = new Image(); im.crossOrigin = "anonymous";
+        im.onload = function () { resolve(im); };
+        im.onerror = next;
+        im.src = urls[i++];
+      }
+      next();
+    });
+  }
+  function loadToken(id) {
+    return rpcBatch(["0x6352211e" + pad(id.toString(16)), "0xc87b56dd" + pad(id.toString(16))]).then(function (res) {
+      if (!res[0] || !res[1]) throw new Error("token not found");
+      var owner = "0x" + res[0].slice(-40).toLowerCase(), uri = decodeString(res[1]);
+      return fetchJSON(uri).then(function (meta) {
+        var attrs = {}; (meta.attributes || []).forEach(function (a) { attrs[a.trait_type] = a.value; });
+        var ch = { key: "token:" + id, tokenId: id, name: meta.name || ("CHOG #" + id), attrs: attrs, imageUrl: meta.image || "", owner: owner, verified: !!account && owner === account, img: null };
+        return ch;
+      });
+    });
+  }
+
+  /* ================= wallet ================= */
+  var account = null;
+  function connectWallet() {
+    var eth = window.ethereum;
+    if (!eth) { status("no wallet found in this browser. try guest chogs or look up a token."); return; }
+    status("waiting for your wallet…");
+    eth.request({ method: "eth_requestAccounts" }).then(function (accs) {
+      account = String(accs[0]).toLowerCase();
+      status("connected " + short(account) + ". looking for your chogs…");
+      return findOwned();
+    }).catch(function () { status("wallet connection was cancelled."); });
+  }
+  function findOwned() {
+    return rpcBatch(["0x70a08231" + pad(account)]).then(function (r) {
+      var bal = r[0] ? parseInt(r[0], 16) : 0;
+      if (!bal) { status("connected " + short(account) + ", but no Chog Genesis found here. try guest chogs or look up a token."); return; }
+      var found = [], id = 1, CH = 40;
+      function step() {
+        if (found.length >= bal || id > SUPPLY) return finish();
+        var ids = []; for (var k = 0; k < CH && id <= SUPPLY; k++, id++) ids.push(id);
+        return rpcBatch(ids.map(function (n) { return "0x6352211e" + pad(n.toString(16)); })).then(function (res) {
+          res.forEach(function (x, i) { if (x && ("0x" + x.slice(-40)) === account) found.push(ids[i]); });
+          status("scanning the collection… " + Math.min(id - 1, SUPPLY) + " / " + SUPPLY + " (found " + found.length + " of " + bal + ")");
+          return sleep(120).then(step);
+        });
+      }
+      function finish() {
+        if (!found.length) { status("balance says " + bal + " but the scan found none. try looking up your token number."); return; }
+        status("found " + found.length + " chog" + (found.length > 1 ? "s" : "") + ". loading…");
+        return Promise.all(found.slice(0, 12).map(loadToken)).then(function (list) { showChogs(list); status("welcome back. pick your chog."); });
+      }
+      return step();
+    });
+  }
+  function lookup(id) {
+    status("looking up token #" + id + "…");
+    loadToken(id).then(function (ch) { showChogs([ch]); status(ch.verified ? "that's yours. verified owner." : "preview mode. you can play it, but progress and the real-art score card are for verified owners."); })
+      .catch(function () { status("couldn't find that token. check the number or try again."); });
+  }
+
+  /* ================= samples (guest) ================= */
+  var SAMPLES = [
+    { n: "Sample Chog", t: "Common",    a: { Background: "Deep Aqua", Skin: "Pink", Body: "Yellow 143 Jersey", Base: "Origin", Mouth: "Flat", Eyes: "Normal Eye", Head: "Dollar Cap", Accessory: "None" } },
+    { n: "Sample Chog", t: "Uncommon",  a: { Background: "Sunset", Skin: "Cream", Body: "Hoodie", Base: "Origin", Mouth: "Smirk", Eyes: "Anime Glass", Head: "Choggie Beanie", Accessory: "Fwog" } },
+    { n: "Sample Chog", t: "Rare",      a: { Background: "Night", Skin: "Pink", Body: "Wizard Robe", Base: "Origin", Mouth: "Smirk", Eyes: "Heart", Head: "Wizard Hat", Accessory: "Staff" } },
+    { n: "Sample Chog", t: "Epic",      a: { Background: "Void", Skin: "Cream", Body: "Racing Suit", Base: "Radioactive", Mouth: "Flat", Eyes: "Sunset visor", Head: "Mon Cap", Accessory: "Fwog" } },
+    { n: "Sample Chog", t: "Legendary", a: { Background: "Gold", Skin: "Gold", Body: "Crown Cape", Base: "Origin", Mouth: "Smirk", Eyes: "Chog Viper", Head: "Red Headband", Accessory: "Trophy" } }
+  ].map(function (s, i) { var at = Object.assign({}, s.a, { Form: "Chog", Tier: s.t }); return { key: "sample:" + i, tokenId: null, name: s.n + " · " + s.t, attrs: at, imageUrl: "", owner: null, verified: false, sample: true, img: null }; });
+
+  /* five more guest chogs, then sort by tier and give every one a nickname */
+  (function addSamples() {
+    var more = [
+      { t: "Common",   a: { Skin: "Cream", Body: "Hoodie", Mouth: "Smile", Eyes: "Round Crying", Head: "TISM Cap", Accessory: "None" } },
+      { t: "Uncommon", a: { Skin: "Blue", Body: "Racing Suit", Mouth: "Smile", Eyes: "Sunset visor", Head: "BTC Beanie", Accessory: "None" } },
+      { t: "Rare",     a: { Skin: "Pink", Body: "Hoodie", Mouth: "Smile", Eyes: "Heart", Head: "Red Headband", Accessory: "Fwog" } },
+      { t: "Epic",     a: { Skin: "Blue", Body: "Hoodie", Mouth: "Flat", Eyes: "Dead", Head: "Mon Cap", Accessory: "Trophy" } },
+      { t: "Legendary", a: { Skin: "Gold", Body: "Wizard Robe", Mouth: "Smile", Eyes: "Anime Glass", Head: "Wizard Hat", Accessory: "Staff" } }
+    ];
+    more.forEach(function (s) { SAMPLES.push({ key: "", tokenId: null, name: "", attrs: Object.assign({ Background: "Night", Base: "Origin", Form: "Chog", Tier: s.t }, s.a), imageUrl: "", owner: null, verified: false, sample: true, img: null }); });
+    SAMPLES.sort(function (a, b) { return TIERS.indexOf(a.attrs.Tier) - TIERS.indexOf(b.attrs.Tier); });
+    var nicks = ["Penny", "Doodle", "Zippy", "Nova", "Merlin", "Cupid", "Blaze", "Phantom", "Ember", "Goldie"];
+    SAMPLES.forEach(function (s, i) { s.key = "sample:" + i; s.name = nicks[i] + " · " + s.attrs.Tier; });
+  })();
+
+  /* ================= traits -> stats ================= */
+  var ABIL = [
+    { n: "Chaos Burst", d: "turns every rug wraith on screen into coins" },
+    { n: "Slow Moon", d: "slows time for 4 seconds" },
+    { n: "Order Shield", d: "blocks the next rug wraith" },
+    { n: "Coin Rain", d: "rains 14 coins from the sky" }
+  ];
+  function derive(ch) {
+    var t = tierIdx(ch), l = function (k) { return A(ch, k).toLowerCase(); };
+    var might = clamp(1 + hash(A(ch, "Body") + A(ch, "Base")) % 5 + t, 1, 10);
+    var cunning = clamp(1 + hash(A(ch, "Eyes") + A(ch, "Accessory")) % 5 + t, 1, 10);
+    var charm = clamp(1 + hash(A(ch, "Head") + A(ch, "Mouth")) % 5 + t, 1, 10);
+    var perks = [], d = { tier: t, might: might, cunning: cunning, charm: charm, coinValue: 10, gemWeight: 1, heartWeight: 1, magnetBonus: 0, bonusLife: 0, scoreBonus: 0, wraithAdd: 0, wraithMul: 1, gemMul: 1, pierce: false };
+    if (/visor|glass|viper/.test(l("Eyes"))) { d.magnetBonus += 22; perks.push("shades: loot is pulled in from farther away"); }
+    if (/wizard/.test(l("Head"))) { d.gemWeight = 2; d.pierce = true; perks.push("wizard hat: gems fall twice as often and fireballs pierce wraiths"); }
+    if (/dollar/.test(l("Head"))) { d.coinValue = 13; perks.push("dollar cap: coins are worth 13"); }
+    if (/heart/.test(l("Eyes"))) { d.heartWeight = 3; perks.push("heart eyes: hearts fall more often"); }
+    if (/dead/.test(l("Eyes"))) { d.bonusLife = 1; perks.push("dead eyes: nine lives, so you start with a shield"); }
+    if (/fwog|frog/.test(l("Accessory") + " " + l("Eyes"))) { d.scoreBonus += 0.05; perks.push("fwog friend: +5% score"); }
+    if (/btc/.test(l("Eyes") + " " + l("Head"))) { d.gemMul *= 1.2; perks.push("btc gear: gems are worth 20% more"); }
+    if (/peace/.test(l("Head"))) { d.bonusLife += 1; perks.push("peace hat: you start with a shield"); }
+    if (/tism|neet/.test(l("Head"))) { d.fireBoost = 0.85; perks.push("tism / neet energy: fireballs recharge 15% faster"); }
+    if (/crying/.test(l("Eyes"))) { d.heartWeight = Math.max(d.heartWeight, 2); perks.push("crying eyes: hearts fall more often"); }
+    if (t >= 3) { d.bonusLife += 1; perks.push(TIERS[t].toLowerCase() + " tier: you start with a shield"); }
+    if (!perks.length) perks.push("no special trait perks. tier and stats do the work.");
+    d.perks = perks;
+    d.trayW = 52 + might * 5;
+    d.speed = 270 + might * 9;
+    d.magnet = cunning * 13 + d.magnetBonus;
+    d.mult = 1 + charm * 0.05 + d.scoreBonus;
+    d.lives = 3; d.startShield = d.bonusLife > 0;
+    d.abil = hash(A(ch, "Head") || "none") % 4;
+    d.chargeNeed = Math.max(12, 30 - cunning * 2 - t * 2);
+    d.fireCd = Math.max(0.3, (1.1 - might * 0.06 - t * 0.04) * (d.fireBoost || 1));
+    return d;
+  }
+
+  /* ================= alter egos and dares ================= */
+  var selAlter = "plain", selDare = "none", runDare = "none", runAlterName = "";
+  var ALTERS = [
+    { id: "plain", name: "Plain Chog", need: null, text: function () { return "no twist. just you and your traits."; }, apply: function () {} },
+    { id: "reckless", name: "Reckless", need: null, text: function (t) { return "faster, faster fire, more wraiths, score +" + Math.round(25 * t) + "%."; }, apply: function (d, t) { d.speed *= 1.25; d.fireCd *= 0.8; d.wraithAdd += 0.08; d.mult *= 1 + 0.25 * t; } },
+    { id: "paper", name: "Paper Hands", need: null, text: function (t, k) { return "start with a shield, " + Math.round((0.5 - 0.04 * k) * 100) + "% of the wraiths, score -" + Math.round((0.2 - 0.04 * k) * 100) + "%."; }, apply: function (d, t, k) { d.startShield = true; d.wraithMul *= 0.5 - 0.04 * k; d.mult *= 0.8 + 0.04 * k; } },
+    { id: "whale", name: "Whale", need: function (ch) { var a = A(ch, "Accessory"); return !!a && a !== "None"; }, needText: "needs an accessory", text: function (t) { return "gems fall 2.5x and are worth +" + Math.round(20 * t) + "%, coins -40%, a few more wraiths."; }, apply: function (d, t) { d.gemWeight *= 2.5; d.gemMul *= 1 + 0.2 * t; d.coinValue = Math.round(d.coinValue * 0.6); d.wraithAdd += 0.06; } },
+    { id: "bandit", name: "Sneaky Bandit", need: function (ch) { return /visor|glass|viper|shade/i.test(A(ch, "Eyes")); }, needText: "needs shades, glasses or a visor", text: function (t) { return "loot magnet +" + Math.round(40 * t) + "%, your move charges 25% faster."; }, apply: function (d, t) { d.magnet = Math.round(d.magnet * (1 + 0.4 * t)); d.chargeNeed = Math.max(8, Math.round(d.chargeNeed * 0.75)); } }
+  ];
+  var DARES = [
+    { id: "none", name: "no dare", desc: "just play." },
+    { id: "coinhater", name: "Coin Hater", desc: "catch 10 coins or fewer and at least 5 gems. +60% score.", bonus: 0.6, check: function (s) { return s.coins <= 10 && s.gems >= 5; }, live: function (s) { return "coins " + s.coins + "/10 max, gems " + s.gems + "/5"; } },
+    { id: "combo", name: "Combo Addict", desc: "reach a x3 combo three times. +40% score.", bonus: 0.4, check: function (s) { return s.x3 >= 3; }, live: function (s) { return "x3 combos " + s.x3 + "/3"; } },
+    { id: "sharp", name: "Sharpshooter", desc: "hit a 20-catch streak. +30% score.", bonus: 0.3, check: function (s) { return s.maxStreak >= 20; }, live: function (s) { return "best streak " + s.maxStreak + "/20"; } }
+  ];
+  function alterOf(id) { return ALTERS.filter(function (x) { return x.id === id; })[0] || ALTERS[0]; }
+  function unlocked(a, ch) { return !a.need || a.need(ch); }
+  function loadSel(ch) { selAlter = "plain"; selDare = "none"; try { var s = JSON.parse(lsGet("chog-sel:" + ch.key) || "null"); if (s) { selAlter = s.a || "plain"; selDare = s.d || "none"; } } catch (e) {} }
+  function saveSel() { lsSet("chog-sel:" + selected.key, JSON.stringify({ a: selAlter, d: selDare })); }
+  function applyAlter(d) {
+    var a = alterOf(selAlter); d = Object.assign({}, d); runAlterName = "";
+    if (unlocked(a, selected)) { a.apply(d, 1 + 0.25 * d.tier, d.tier); runAlterName = a.id === "plain" ? "" : a.name; }
+    return d;
+  }
+  function dareText() { var dr = DARES.filter(function (x) { return x.id === runDare; })[0]; return dr && dr.live ? "dare: " + dr.name + " · " + dr.live(st) : ""; }
+  function renderAlters() {
+    loadSel(selected); if (!unlocked(alterOf(selAlter), selected)) selAlter = "plain";
+    var k = derived.tier, t = 1 + 0.25 * k, box = $("alterBox"); box.innerHTML = "";
+    ALTERS.forEach(function (a) {
+      var ok = unlocked(a, selected), b = document.createElement("button"); b.type = "button"; b.className = "alt tog"; b.disabled = !ok; b.setAttribute("aria-pressed", a.id === selAlter ? "true" : "false");
+      b.innerHTML = esc(a.name) + (ok ? "" : "<small>" + a.needText + "</small>");
+      b.addEventListener("click", function () { selAlter = a.id; saveSel(); renderAlters(); });
+      box.appendChild(b);
+    });
+    var cur = alterOf(selAlter);
+    $("alterDesc").textContent = cur.text(t, k) + (cur.id === "plain" ? "" : " strength x" + t.toFixed(2).replace(/0$/, "") + " from your " + (A(selected, "Tier") || "Common").toLowerCase() + " tier.");
+    var db = $("dareBox"); db.innerHTML = "";
+    DARES.forEach(function (x) { var b = document.createElement("button"); b.type = "button"; b.className = "alt tog"; b.setAttribute("aria-pressed", x.id === selDare ? "true" : "false"); b.textContent = x.name; b.addEventListener("click", function () { selDare = x.id; saveSel(); renderAlters(); }); db.appendChild(b); });
+    $("dareDesc").textContent = DARES.filter(function (x) { return x.id === selDare; })[0].desc;
+  }
+
+  /* ================= progress ================= */
+  function loadProg(ch) {
+    var d = { xp: 0, best: 0, runs: 0, lastDay: "", streak: 0, questDay: "", questCaught: 0, questDone: false };
+    if (ch.verified) { try { var p = JSON.parse(lsGet("chog:" + ch.key) || "null"); if (p) d = Object.assign(d, p); } catch (e) {} }
+    if (d.questDay !== today()) { d.questDay = today(); d.questCaught = 0; d.questDone = false; }
+    return d;
+  }
+  var sessionBest = 0;
+  function saveProg(ch, p) { if (ch.verified) lsSet("chog:" + ch.key, JSON.stringify(p)); }
+  function levelOf(xp) { return Math.min(20, Math.floor(Math.sqrt(xp / 40)) + 1); }
+  function levelBonus(xp) { return (Math.min(levelOf(xp), 20) - 1) * 0.02; }
+  function streakBonus(p) { return p.lastDay === today() ? Math.min(p.streak, 7) * 0.03 : 0; }
+  var QUEST_GOAL = 40;
+
+  /* ================= drawing ================= */
+  function rr(c, x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath(); }
+  function skinColor(ch) {
+    var s = A(ch, "Skin").toLowerCase();
+    if (/pink/.test(s)) return "#ffc2d4"; if (/green/.test(s)) return "#a6e8a6"; if (/blue/.test(s)) return "#aed6ff";
+    if (/gold|yellow/.test(s)) return "#ffd978"; if (/purple/.test(s)) return "#cdb4ff"; return "#fff1dc";
+  }
+  /* original homage: cream face, thick outlines, purple spikes. Not a copy of any official image. */
+  function drawChog(c, cx, cy, u, ch, mood) {
+    var l = function (k) { return A(ch, k).toLowerCase(); }, tier = tierIdx(ch), INK = "#1a1030";
+    c.save(); c.lineJoin = "round"; c.lineCap = "round"; c.strokeStyle = INK; c.lineWidth = Math.max(1.4, u * 0.55);
+    if (tier >= 2) { c.shadowColor = TIER_COL[TIERS[tier]]; c.shadowBlur = u * 4; }
+    c.fillStyle = "#6d4bd8"; rr(c, cx - 7 * u, cy + 6 * u, 14 * u, 10 * u, 3 * u); c.fill(); c.shadowBlur = 0; c.stroke();
+    c.fillStyle = "#5a38bf"; rr(c, cx - 3 * u, cy + 11 * u, 6 * u, 3.4 * u, 1.2 * u); c.fill();
+    c.fillStyle = "#5a3bd0"; c.beginPath(); c.moveTo(cx - 8.5 * u, cy);
+    var sp = [[-7.5, -9], [-5, -4], [-2.8, -11.5], [0, -5], [2.8, -11.5], [5, -4], [7.5, -9], [8.5, 0]];
+    sp.forEach(function (p) { c.lineTo(cx + p[0] * u, cy + p[1] * u); }); c.closePath(); c.fill(); c.stroke();
+    c.fillStyle = skinColor(ch); c.beginPath(); c.ellipse(cx, cy + 1 * u, 8 * u, 7 * u, 0, 0, 7); c.fill(); c.stroke();
+    c.fillStyle = "rgba(255,90,150,.55)"; c.beginPath(); c.arc(cx - 5.2 * u, cy + 3.4 * u, 1.5 * u, 0, 7); c.arc(cx + 5.2 * u, cy + 3.4 * u, 1.5 * u, 0, 7); c.fill();
+    c.fillStyle = "#5a3bd0"; c.beginPath(); c.moveTo(cx - 7 * u, cy - 3 * u); c.lineTo(cx - 3 * u, cy - 0.5 * u); c.lineTo(cx - 1 * u, cy - 4.5 * u); c.lineTo(cx + 2 * u, cy - 0.8 * u); c.lineTo(cx + 5 * u, cy - 4 * u); c.lineTo(cx + 7 * u, cy - 3 * u); c.lineTo(cx + 6 * u, cy - 6 * u); c.lineTo(cx - 6 * u, cy - 6 * u); c.closePath(); c.fill();
+    var ey = cy + 0.5 * u, eyes = l("Eyes");
+    if (mood === "dizzy" || /dead/.test(eyes)) {
+      c.lineWidth = u * 0.7; [-3, 3].forEach(function (dx) { c.beginPath(); c.moveTo(cx + dx * u - u, ey - u); c.lineTo(cx + dx * u + u, ey + u); c.moveTo(cx + dx * u + u, ey - u); c.lineTo(cx + dx * u - u, ey + u); c.stroke(); });
+    } else if (/visor|glass|viper|shade/.test(eyes)) {
+      var g = c.createLinearGradient(cx - 7 * u, 0, cx + 7 * u, 0); g.addColorStop(0, "#ff9a3d"); g.addColorStop(1, "#ff5a8a");
+      c.fillStyle = /viper/.test(eyes) ? "#12331f" : g; rr(c, cx - 7 * u, ey - 1.8 * u, 14 * u, 4 * u, 2 * u); c.fill(); c.stroke();
+      c.strokeStyle = "rgba(255,255,255,.7)"; c.lineWidth = u * 0.5; c.beginPath(); c.moveTo(cx - 5 * u, ey - 0.8 * u); c.lineTo(cx - 3 * u, ey - 0.8 * u); c.stroke(); c.strokeStyle = INK;
+    } else if (/heart/.test(eyes)) {
+      c.fillStyle = "#ff3d6e"; c.font = "800 " + (5.5 * u) + "px sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("♥", cx - 3 * u, ey); c.fillText("♥", cx + 3 * u, ey);
+    } else {
+      var wide = mood === "wide" ? 1.25 : 1;
+      [-3, 3].forEach(function (dx) { c.fillStyle = "#fff"; c.beginPath(); c.ellipse(cx + dx * u, ey, 2.1 * u * wide, 2.7 * u * wide, 0, 0, 7); c.fill(); c.lineWidth = u * 0.4; c.stroke(); c.fillStyle = INK; c.beginPath(); c.arc(cx + dx * u, ey + 0.2 * u, 1.1 * u, 0, 7); c.fill(); });
+    }
+    c.strokeStyle = INK; c.lineWidth = Math.max(1.2, u * 0.5); var my = cy + 5 * u, mo = l("Mouth");
+    c.beginPath();
+    if (mood === "smirk" || /smirk/.test(mo)) { c.moveTo(cx - 2 * u, my + 0.4 * u); c.quadraticCurveTo(cx + 1 * u, my + 1.2 * u, cx + 3 * u, my - 0.6 * u); }
+    else if (/flat/.test(mo) && mood !== "tongue") { c.moveTo(cx - 2 * u, my); c.lineTo(cx + 2 * u, my); }
+    else { c.arc(cx, my - 0.8 * u, 2 * u, 0.15 * Math.PI, 0.85 * Math.PI); }
+    c.stroke();
+    if (mood === "tongue") { c.fillStyle = "#ff6f9a"; c.beginPath(); c.ellipse(cx + 0.6 * u, my + 1.6 * u, 1.3 * u, 1.7 * u, 0, 0, 7); c.fill(); c.lineWidth = u * 0.4; c.stroke(); }
+    var hat = l("Head"), hc = ["#8b5cf6", "#ef476f", "#2ec4b6", "#ffb703"][hash(hat) % 4]; c.lineWidth = Math.max(1.4, u * 0.55);
+    if (/wizard/.test(hat)) { c.fillStyle = "#3b1d8f"; c.beginPath(); c.moveTo(cx - 9 * u, cy - 4 * u); c.lineTo(cx + 1 * u, cy - 18 * u); c.lineTo(cx + 9 * u, cy - 4 * u); c.closePath(); c.fill(); c.stroke(); c.fillStyle = "#ffd24a"; c.font = "800 " + (4 * u) + "px sans-serif"; c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("★", cx + 1 * u, cy - 9 * u); }
+    else if (/beanie/.test(hat)) { c.fillStyle = hc; c.beginPath(); c.arc(cx, cy - 3 * u, 8.5 * u, Math.PI, 0); c.closePath(); c.fill(); c.stroke(); c.fillStyle = "rgba(255,255,255,.35)"; rr(c, cx - 8.5 * u, cy - 4.6 * u, 17 * u, 2.4 * u, u); c.fill(); c.stroke(); }
+    else if (/cap|hat/.test(hat)) { c.fillStyle = hc; c.beginPath(); c.arc(cx, cy - 3 * u, 8.5 * u, Math.PI, 0); c.closePath(); c.fill(); c.stroke(); c.fillStyle = "#4b2db0"; c.beginPath(); c.ellipse(cx + 5 * u, cy - 3 * u, 6 * u, 1.5 * u, 0, 0, 7); c.fill(); c.stroke(); }
+    else if (/headband|band/.test(hat)) { c.fillStyle = "#ef476f"; rr(c, cx - 8 * u, cy - 4 * u, 16 * u, 2.2 * u, u); c.fill(); c.stroke(); }
+    c.restore();
+  }
+  /* the four original supporting characters */
+  function drawCast(c, kind, cx, cy, u) {
+    c.save(); c.lineJoin = "round"; c.lineCap = "round"; c.strokeStyle = "#1a1030"; c.lineWidth = Math.max(1.3, u * 0.5);
+    if (kind === "zero") {
+      c.beginPath(); c.moveTo(cx, cy - 8 * u); c.lineTo(cx, cy - 4 * u); c.stroke(); c.fillStyle = "#ff9a3d"; c.beginPath(); c.arc(cx, cy - 8.5 * u, 1.4 * u, 0, 7); c.fill(); c.stroke();
+      c.fillStyle = "#4a5688"; rr(c, cx - 8 * u, cy - 4 * u, 16 * u, 13 * u, 3 * u); c.fill(); c.stroke();
+      c.fillStyle = "#0e1230"; rr(c, cx - 6 * u, cy - 2 * u, 12 * u, 8 * u, 2 * u); c.fill();
+      c.fillStyle = "#58e1ff"; c.fillRect(cx - 4 * u, cy, 2.2 * u, 2.6 * u); c.fillRect(cx + 1.8 * u, cy, 2.2 * u, 2.6 * u);
+      c.strokeStyle = "#ff5a6e"; c.lineWidth = u * 0.5; c.beginPath(); c.moveTo(cx + 2 * u, cy - 2 * u); c.lineTo(cx + 0.5 * u, cy + 1.5 * u); c.lineTo(cx + 2.5 * u, cy + 3 * u); c.lineTo(cx + 1 * u, cy + 6 * u); c.stroke();
+    } else if (kind === "clerk") {
+      c.fillStyle = "#ffe0a8"; c.beginPath(); c.ellipse(cx, cy + 1 * u, 8 * u, 7.5 * u, 0, 0, 7); c.fill(); c.stroke();
+      c.fillStyle = "#fff"; [-3, 3].forEach(function (dx) { c.beginPath(); c.arc(cx + dx * u, cy - 0.5 * u, 2.4 * u, 0, 7); c.fill(); c.stroke(); }); c.fillStyle = "#1a1030"; [-3, 3].forEach(function (dx) { c.beginPath(); c.arc(cx + dx * u, cy - 0.5 * u, 0.9 * u, 0, 7); c.fill(); });
+      c.beginPath(); c.arc(cx, cy + 3.8 * u, 1.6 * u, 0.1 * Math.PI, 0.9 * Math.PI); c.stroke();
+      c.fillStyle = "#c98b4a"; rr(c, cx + 4 * u, cy + 2 * u, 6 * u, 8 * u, u); c.fill(); c.stroke(); c.fillStyle = "#fff"; c.fillRect(cx + 5 * u, cy + 3.5 * u, 4 * u, 5 * u);
+      c.fillStyle = "#ef476f"; c.beginPath(); c.arc(cx + 7 * u, cy + 6 * u, 1.2 * u, 0, 7); c.fill();
+    } else if (kind === "wraith") {
+      c.shadowColor = "#a855f7"; c.shadowBlur = u * 5; c.fillStyle = "#2b1659";
+      c.beginPath(); c.moveTo(cx, cy - 9 * u); c.bezierCurveTo(cx + 9 * u, cy - 8 * u, cx + 9 * u, cy + 2 * u, cx + 8 * u, cy + 8 * u);
+      for (var i = 0; i < 4; i++) { c.lineTo(cx + (8 - 4 * i - 2) * u, cy + 10.5 * u); c.lineTo(cx + (8 - 4 * i - 4) * u, cy + 8 * u); }
+      c.bezierCurveTo(cx - 9 * u, cy + 2 * u, cx - 9 * u, cy - 8 * u, cx, cy - 9 * u); c.closePath(); c.fill(); c.shadowBlur = 0; c.stroke();
+      c.fillStyle = "#ff3d5e"; c.beginPath(); c.ellipse(cx - 3 * u, cy - 2 * u, 1.7 * u, 2.4 * u, 0, 0, 7); c.ellipse(cx + 3 * u, cy - 2 * u, 1.7 * u, 2.4 * u, 0, 0, 7); c.fill();
+      c.strokeStyle = "#ff3d5e"; c.lineWidth = u * 0.6; c.beginPath(); c.moveTo(cx - 3 * u, cy + 3 * u); [-1.5, 0, 1.5, 3].forEach(function (x, k) { c.lineTo(cx + x * u, cy + (k % 2 ? 3 : 4.5) * u); }); c.stroke();
+    } else if (kind === "pigeon") {
+      c.fillStyle = "#9aa6cc"; c.beginPath(); c.ellipse(cx, cy + 3 * u, 8 * u, 6 * u, 0, 0, 7); c.fill(); c.stroke();
+      c.fillStyle = "#7683ad"; c.beginPath(); c.ellipse(cx - 1 * u, cy + 4 * u, 4.5 * u, 3 * u, -0.4, 0, 7); c.fill(); c.stroke();
+      c.fillStyle = "#b8c2e4"; c.beginPath(); c.arc(cx + 3 * u, cy - 3 * u, 4.6 * u, 0, 7); c.fill(); c.stroke();
+      c.fillStyle = "#ff9a3d"; c.beginPath(); c.moveTo(cx + 7 * u, cy - 3.6 * u); c.lineTo(cx + 11 * u, cy - 2.6 * u); c.lineTo(cx + 7 * u, cy - 1.4 * u); c.closePath(); c.fill(); c.stroke();
+      c.fillStyle = "#1a1030"; c.beginPath(); c.arc(cx + 4.4 * u, cy - 4 * u, 0.9 * u, 0, 7); c.fill();
+    }
+    c.restore();
+  }
+
+  /* Chog's face as a round badge: the speaker icon for every speech bubble. Original drawing, not the official logo. */
+  var LOGO_CH = { attrs: { Skin: "Cream", Eyes: "Normal Eye", Mouth: "Smile", Head: "None", Tier: "Common" } };
+  function drawLogo(c, x, y, r) {
+    c.save(); c.beginPath(); c.arc(x, y, r, 0, 7); c.clip();
+    var g = c.createLinearGradient(x - r, y - r, x + r, y + r); g.addColorStop(0, "#2a1a6b"); g.addColorStop(1, "#6c52fb"); c.fillStyle = g; c.fillRect(x - r, y - r, 2 * r, 2 * r);
+    drawChog(c, x, y + r * 0.2, r / 9.5, LOGO_CH, "normal"); c.restore();
+    c.strokeStyle = "#f3eeff"; c.lineWidth = 2; c.beginPath(); c.arc(x, y, r, 0, 7); c.stroke();
+  }
+
+  /* ================= art mode ================= */
+  var useReal = lsGet("chog-art") !== "orig";
+  function portrait(canvas, ch, size) {
+    canvas.width = size; canvas.height = size;
+    var c = canvas.getContext("2d");
+    c.fillStyle = "#0d0724"; c.fillRect(0, 0, size, size);
+    if (useReal && ch.img) { c.drawImage(ch.img, 0, 0, size, size); }
+    else {
+      var g = c.createLinearGradient(0, 0, size, size); g.addColorStop(0, "#2a1a6b"); g.addColorStop(1, "#173a6b"); c.fillStyle = g; c.fillRect(0, 0, size, size);
+      drawChog(c, size / 2, size * 0.62, size / 29, ch, "normal");
+    }
+  }
+
+  /* ================= screens ================= */
+  var selected = null, derived = null, prog = null, shown = [];
+  function show(id) { ["home", "sheet", "builder", "play"].forEach(function (s) { $(s).hidden = s !== id; }); window.scrollTo(0, 0); }
+
+  function renderCast() {
+    var info = [["zero", "Prototype Zero", "your guide. leftover of the failed experiment."], ["clerk", "Order Clerk", "hands out daily quests and ranks."], ["wraith", "Rug Wraith", "steals lives. made of pulled rugs."], ["logo", "Chog", "the voice of the game. catchphrases included."]];
+    $("cast").innerHTML = info.map(function (x, i) { return '<div><canvas width="104" height="104" data-k="' + x[0] + '"></canvas><div style="min-width:0"><b>' + x[1] + '</b><span>' + x[2] + '</span></div></div>'; }).join("");
+    Array.prototype.forEach.call($("cast").querySelectorAll("canvas"), function (cv) { var c = cv.getContext("2d"); if (cv.dataset.k === "logo") drawLogo(c, 52, 52, 40); else drawCast(c, cv.dataset.k, 52, 50, 4.8); });
+  }
+
+  var tierSel = "All";
+  function showChogs(list, quiet) {
+    shown = list; $("chogListWrap").hidden = false; buildFilter();
+    var box = $("chogList"); box.innerHTML = "";
+    list.filter(function (c) { return tierSel === "All" || A(c, "Tier") === tierSel; }).forEach(function (ch) {
+      var b = document.createElement("button"); b.type = "button"; b.className = "card"; b.style.setProperty("--r", TIER_COL[A(ch, "Tier")] || "#8b5cf6");
+      b.innerHTML = '<canvas></canvas><span class="nm">' + esc(ch.name) + '</span><span class="tr">' + esc(A(ch, "Tier") || "Common") + (ch.verified ? " · yours" : ch.custom ? " · custom" : ch.sample ? " · sample" : " · preview") + "</span>";
+      var cv = b.querySelector("canvas"); portrait(cv, ch, 240);
+      b.insertAdjacentHTML("beforeend", '<span class="small muted">' + esc([A(ch, "Head"), A(ch, "Eyes")].filter(function (x) { return x && x !== "None"; }).join(" · ")) + "</span>");
+      b.addEventListener("mouseenter", function () { setHero(ch, true); });
+      b.addEventListener("focus", function () { setHero(ch, true); });
+      b.addEventListener("click", function () { openSheet(ch); });
+      box.appendChild(b);
+      if (ch.imageUrl && !ch.img) loadImage(ch.imageUrl).then(function (im) { if (im) { ch.img = im; portrait(cv, ch, 240); } });
+    });
+    if (!quiet) { $("chogListWrap").scrollIntoView({ behavior: "smooth", block: "start" }); if (list[0]) setHero(list[0], true); }
+  }
+
+  function openSheet(ch) {
+    selected = ch; derived = derive(ch); prog = loadProg(ch);
+    var col = TIER_COL[A(ch, "Tier")] || "#8b5cf6"; $("heroBox").style.setProperty("--r", col);
+    $("shName").textContent = ch.name;
+    var tb = $("shTier"); tb.textContent = (A(ch, "Tier") || "Common").toLowerCase(); tb.style.setProperty("--r", col);
+    var ob = $("shOwn"); ob.className = "badge " + (ch.verified ? "ok" : "pv"); ob.textContent = ch.verified ? "verified owner" : ch.custom ? "demo: custom chog" : ch.sample ? "demo: sample chog" : "preview, not owner";
+    $("artReal").disabled = !ch.imageUrl; syncArt();
+    var order = ["Background", "Base", "Skin", "Body", "Mouth", "Eyes", "Head", "Accessory"];
+    $("shTraits").innerHTML = order.filter(function (k) { return A(ch, k) && A(ch, k) !== "None"; }).map(function (k) { return '<span class="chip"><b>' + k.toLowerCase() + ":</b> " + esc(A(ch, k)) + "</span>"; }).join("");
+    var d = derived;
+    $("shBars").innerHTML = [["might", d.might, "tray width and speed. from body + base"], ["cunning", d.cunning, "loot magnet and move charge. from eyes + accessory"], ["charm", d.charm, "score multiplier. from head + mouth"]].map(function (s) {
+      return '<div class="bar" title="' + s[2] + '"><span>' + s[0] + '</span><i><em style="width:' + s[1] * 10 + '%"></em></i><span>' + s[1] + "</span></div>";
+    }).join("");
+    $("shPerks").innerHTML = d.perks.map(function (p) { return "<li>• " + esc(p) + "</li>"; }).join("");
+    $("shAbility").textContent = "signature move: " + ABIL[d.abil].n + " (" + ABIL[d.abil].d + "). picked by the head trait. " + (/^[aeiou]/i.test(A(ch, "Tier")) ? "an " : "a ") + (A(ch, "Tier") || "Common").toLowerCase() + " chog charges it after " + d.chargeNeed + " catches. your fireball recharges in " + d.fireCd.toFixed(1) + "s.";
+    renderProgress(); renderAlters();
+    show("sheet");
+  }
+  function syncArt() { var real = useReal && !!selected.imageUrl; $("artReal").setAttribute("aria-pressed", real ? "true" : "false"); $("artOrig").setAttribute("aria-pressed", real ? "false" : "true"); redrawSheet(); }
+  function redrawSheet() {
+    portrait($("sheetCanvas"), selected, 300);
+    if (selected.imageUrl && !selected.img) loadImage(selected.imageUrl).then(function (im) { if (im) { selected.img = im; portrait($("sheetCanvas"), selected, 300); } });
+  }
+  function renderProgress() {
+    if (!selected.verified) {
+      $("lvlText").textContent = "demo"; $("xpBar").style.width = "0%"; $("xpText").textContent = "";
+      $("streakText").textContent = "demo mode. xp, levels, streaks and daily quests are kept for verified chog genesis owners.";
+      $("checkinBtn").disabled = true; $("checkinBtn").textContent = "owners only";
+      $("questText").textContent = "connect a wallet that holds a chog genesis to unlock progress and the daily quest.";
+      return;
+    }
+    var lv = levelOf(prog.xp), cur = Math.pow(lv - 1, 2) * 40, nxt = Math.pow(lv, 2) * 40;
+    $("lvlText").textContent = "level " + lv;
+    $("xpBar").style.width = (lv >= 20 ? 100 : clamp((prog.xp - cur) / (nxt - cur) * 100, 0, 100)) + "%";
+    $("xpText").textContent = prog.xp + " xp";
+    var done = prog.lastDay === today();
+    $("streakText").textContent = prog.streak ? ("still here streak: " + prog.streak + " day" + (prog.streak > 1 ? "s" : "") + (done ? ". checked in today, +" + Math.round(streakBonus(prog) * 100) + "% score." : ". check in to keep it.")) : "no streak yet. check in today to start one.";
+    $("checkinBtn").disabled = done; $("checkinBtn").textContent = done ? "see you tomorrow" : "i'm still here";
+    $("questText").textContent = "order clerk's daily quest: catch " + QUEST_GOAL + " items (" + Math.min(prog.questCaught, QUEST_GOAL) + "/" + QUEST_GOAL + ")" + (prog.questDone ? " done, +100 xp claimed." : ". reward: +100 xp.");
+  }
+  function checkin() {
+    if (prog.lastDay === today()) return;
+    prog.streak = prog.lastDay === yesterday() ? prog.streak + 1 : 1; prog.lastDay = today();
+    saveProg(selected, prog); renderProgress();
+  }
+
+  /* ================= audio ================= */
+  var AC = null, muted = false;
+  function beep(f, d, type, vol, slide) {
+    if (muted || !AC) return;
+    try { var o = AC.createOscillator(), g = AC.createGain(), t = AC.currentTime; o.type = type || "square"; o.frequency.setValueAtTime(f, t); if (slide) o.frequency.exponentialRampToValueAtTime(Math.max(40, slide), t + d); g.gain.setValueAtTime(vol || 0.05, t); g.gain.exponentialRampToValueAtTime(0.0001, t + d); o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t + d); } catch (e) {}
+  }
+
+  /* ================= game ================= */
+  var cv = $("game"), ctx = cv.getContext("2d"), W = cv.width, H = cv.height;
+  var MONAD = new Path2D("M11.782 0C8.37963 0 0 8.53443 0 11.9999C0 15.4654 8.37963 24 11.782 24C15.1844 24 23.5642 15.4653 23.5642 11.9999C23.5642 8.53458 15.1845 0 11.782 0ZM9.94598 18.8619C8.51124 18.4637 4.65378 11.5912 5.04481 10.1299C5.43584 8.66856 12.1834 4.73984 13.6181 5.1381C15.0529 5.5363 18.9104 12.4087 18.5194 13.87C18.1283 15.3314 11.3807 19.2602 9.94598 18.8619Z");
+  var PS = 54, PY = H - 90, st = null, last = 0, raf = 0, keys = {}, targetX = null;
+  var INTRO = ["hold tight. no excuses."];
+  var HATLINES = ["gchog!", "brighter days ahead.", "chog is cooking. might delete that later."];
+  var HITLINES = ["this is fine.", "might delete that later.", "it's just a little fire.", "hold tight. we go again."];
+  var COMBOLINES = ["combo x2. gchog!", "combo x3. who's still here? me.", "combo x4. nothing can't stop us.", "combo x5. no excuses."];
+
+  function say(t, secs) { st.say = { text: t, life: secs || 2.4 }; }
+  function mood(m, secs) { st.mood = m; st.moodT = secs || 0.8; }
+  function hud() {
+    $("score").textContent = st.score; $("combo").textContent = "x" + comboMult();
+    var h = ""; for (var i = 0; i < st.lives; i++) h += "♥"; $("hearts").textContent = h || "-";
+    var r = st.charge >= derived.chargeNeed; $("abil").classList.toggle("ready", r);
+    $("abilFill").style.width = Math.min(100, st.charge / derived.chargeNeed * 100) + "%";
+    $("dareLine").textContent = dareText();
+    $("abilName").textContent = r ? ABIL[derived.abil].n + " ready. tap or press space" : ABIL[derived.abil].n + " " + Math.min(st.charge, derived.chargeNeed) + "/" + derived.chargeNeed;
+  }
+  function comboMult() { return Math.min(5, 1 + Math.floor(st.streak / 5)); }
+  function scoreMult() { return derived.mult * (1 + levelBonus(prog.xp)) * (1 + streakBonus(prog)); }
+
+  function newRun() {
+    st = { x: W / 2, lives: derived.lives, score: 0, streak: 0, caught: 0, gems: 0, t: 0, spawn: 0.6, items: [], pops: [], over: false, shake: 0, stars: [], charge: 0, slow: 0, shield: false, shieldT: 0, say: null, mood: "normal", moodT: 0, bestCombo: 1, questGain: 0, coins: 0, x3: 0, maxStreak: 0, flare: 0, embers: [], shots: [], fireT: 0, burned: 0 };
+    for (var i = 0; i < 40; i++) st.stars.push({ x: Math.random() * W, y: Math.random() * H, z: 0.3 + Math.random() * 0.7 });
+    targetX = null;
+    if (derived.startShield) { st.shield = true; st.shieldT = 45; }
+    if (!lsGet("chog-seen")) { lsSet("chog-seen", "1"); say("gchog! drag to move. catch the monad coins. hit fire to burn wraiths.", 5); } else say(pick(INTRO), 3.4);
+    hud();
+  }
+  function pop(text, x, y, color) { st.pops.push({ text: text, x: x, y: y, c: color, life: 0.8 }); }
+
+  function spawn() {
+    var s = st, d = derived, pB = Math.min((0.12 + s.t * 0.003 + d.wraithAdd) * d.wraithMul, 0.4), r = Math.random(), type, pH = 0.02 * d.heartWeight, pG = 0.12 * d.gemWeight;
+    if (s.t > 4 && r < pB) type = "wraith"; else if (r < pB + pH) type = "heart"; else if (r < pB + pH + pG) type = "gem"; else type = "coin";
+    s.items.push({ type: type, x: 22 + Math.random() * (W - 44), y: -22, vy: 130 + s.t * 3.2 + Math.random() * 40, rot: Math.random() * 6, r: 12 });
+  }
+
+  function useAbility() {
+    if (!st || st.over || st.charge < derived.chargeNeed) return;
+    st.charge = 0; var s = st, a = derived.abil;
+    if (a === 0) { s.items.forEach(function (it) { if (it.type === "wraith") { it.type = "coin"; pop("wraith? coin.", it.x, it.y, "#ffc83d"); } }); say("chaos burst. every wraith is a coin now. gchog!"); }
+    else if (a === 1) { s.slow = 4; say("slow moon. hold tight."); }
+    else if (a === 2) { s.shield = true; s.shieldT = 10; say("shield up. nothing can't stop us."); }
+    else { for (var i = 0; i < 14; i++) s.items.push({ type: "coin", x: 20 + Math.random() * (W - 40), y: -20 - i * 34, vy: 150, rot: Math.random() * 6, r: 12 }); say("coin rain. brighter days ahead."); }
+    s.flare = Math.max(s.flare, 0.8); mood("smirk", 1.2); beep(300, 0.3, "sawtooth", 0.06, 900); hud();
+  }
+
+  function fire() {
+    if (!st || st.over || st.fireT > 0 || $("play").hidden) return;
+    var d = derived; st.shots.push({ x: st.x, y: PY - 8, vy: -470, pierce: !!d.pierce, r: 6 + d.tier }); st.fireT = d.fireCd; st.flare = Math.max(st.flare, 0.2); mood("smirk", 0.35); beep(240, 0.12, "sawtooth", 0.04, 560);
+  }
+
+  function update(dt) {
+    var s = st, d = derived; s.t += dt;
+    if (s.moodT > 0) { s.moodT -= dt; if (s.moodT <= 0) s.mood = "normal"; }
+    if (s.say) { s.say.life -= dt; if (s.say.life <= 0) s.say = null; }
+    if (s.shield) { s.shieldT -= dt; if (s.shieldT <= 0) s.shield = false; }
+    var idt = s.slow > 0 ? dt * 0.45 : dt; if (s.slow > 0) s.slow -= dt;
+    var dir = (keys.ArrowRight || keys.d || keys.D ? 1 : 0) - (keys.ArrowLeft || keys.a || keys.A ? 1 : 0);
+    if (dir) { s.x += dir * d.speed * dt; targetX = null; }
+    else if (targetX !== null) { var dd = targetX - s.x, step = d.speed * 1.8 * dt; s.x += Math.abs(dd) < step ? dd : Math.sign(dd) * step; }
+    s.x = clamp(s.x, d.trayW / 2, W - d.trayW / 2);
+    s.spawn -= idt; if (s.spawn <= 0) { spawn(); s.spawn = Math.max(0.28, 0.75 - s.t * 0.007) * (0.8 + Math.random() * 0.4); }
+    for (var i = s.items.length - 1; i >= 0; i--) {
+      var it = s.items[i]; it.y += it.vy * idt; it.rot += idt * 4;
+      if (d.magnet && it.type !== "wraith" && it.y < PY && PY - it.y < 220 && Math.abs(it.x - s.x) < d.magnet) it.x += Math.sign(s.x - it.x) * 150 * idt;
+      if (it.type === "wraith" && !it.near && it.y > PY - 30 && Math.abs(it.x - s.x) < d.trayW / 2 + 46 && Math.abs(it.x - s.x) > d.trayW / 2 + 8) { it.near = true; mood("tongue", 0.8); }
+      var hit = it.y + it.r >= PY + 8 && it.y - it.r <= PY + 60 && Math.abs(it.x - s.x) <= d.trayW / 2 + it.r * 0.6;
+      if (hit) { collect(it); s.items.splice(i, 1); continue; }
+      if (it.y > H + 24) { if (it.type === "coin" || it.type === "gem") { if (s.streak) pop("miss", it.x, H - 24, "#aaa1d8"); s.streak = 0; hud(); } s.items.splice(i, 1); }
+    }
+    for (var j = s.pops.length - 1; j >= 0; j--) { var p = s.pops[j]; p.life -= dt; p.y -= 40 * dt; if (p.life <= 0) s.pops.splice(j, 1); }
+    s.shake = Math.max(0, s.shake - dt);
+    s.flare = Math.max(0, s.flare - dt * 0.7);
+    if (Math.random() < dt * 40 * fireInten(s)) s.embers.push({ x: Math.random() * W, y: H - 14, vx: (Math.random() - 0.5) * 30, vy: -(50 + Math.random() * 110), life: 1 + Math.random() * 1.2, c: Math.random() < 0.5 ? "#ffb347" : "#ffe08a" });
+    for (var e = s.embers.length - 1; e >= 0; e--) { var em = s.embers[e]; em.x += em.vx * dt; em.y += em.vy * dt; em.life -= dt; if (em.life <= 0) s.embers.splice(e, 1); }
+    if (s.fireT > 0) s.fireT -= dt;
+    for (var q = s.shots.length - 1; q >= 0; q--) {
+      var sh = s.shots[q]; sh.y += sh.vy * dt; var gone = sh.y < -20;
+      for (var w2 = s.items.length - 1; w2 >= 0 && !gone; w2--) {
+        var wi = s.items[w2];
+        if (wi.type === "wraith" && Math.abs(wi.x - sh.x) < wi.r + sh.r + 8 && Math.abs(wi.y - sh.y) < wi.r + sh.r + 10) {
+          s.items.splice(w2, 1); s.burned++; var bp = Math.round(25 * comboMult() * scoreMult()); s.score += bp; s.charge = Math.min(d.chargeNeed, s.charge + 1);
+          pop("BURNED +" + bp, wi.x, wi.y, "#ff8a3d");
+          for (var b = 0; b < 8; b++) s.embers.push({ x: wi.x, y: wi.y, vx: (Math.random() - 0.5) * 120, vy: -(20 + Math.random() * 90), life: 0.6 + Math.random() * 0.6, c: b % 2 ? "#ffb347" : "#ffe08a" });
+          beep(420, 0.12, "square", 0.05, 160);
+          if (s.burned === 1) say("burned one. gchog!"); else if (s.burned % 5 === 0) say("chog is not defenseless. chog is on fire. no excuses.");
+          hud();
+          if (!sh.pierce) gone = true;
+        }
+      }
+      if (gone) s.shots.splice(q, 1);
+    }
+  }
+
+  function collect(it) {
+    var s = st, d = derived;
+    if (it.type === "wraith") {
+      if (s.shield) { s.shield = false; pop("blocked", it.x, PY - 10, "#4fe0ff"); beep(700, 0.15, "triangle", 0.06, 300); return; }
+      s.lives--; s.streak = 0; s.shake = 0.3; s.flare = 0.9; pop("RUG PULL", it.x, PY - 10, "#ff5a6e"); say(pick(HITLINES)); beep(180, 0.3, "sawtooth", 0.08, 50); hud();
+      if (s.lives <= 0) endRun(); return;
+    }
+    if (it.type === "heart") { s.lives = Math.min(3, s.lives + 1); pop("+LIFE", it.x, PY - 10, "#ff8a9a"); beep(520, 0.25, "triangle", 0.07, 900); hud(); return; }
+    var base = it.type === "gem" ? Math.round(50 * d.gemMul) : d.coinValue;
+    s.streak++; s.caught++; if (it.type === "gem") s.gems++; else s.coins++;
+    if (s.streak > s.maxStreak) s.maxStreak = s.streak; if (s.streak === 10) s.x3++;
+    var before = comboMult(), pts = Math.round(base * comboMult() * scoreMult()); s.score += pts; s.charge = Math.min(d.chargeNeed, s.charge + 1);
+    s.bestCombo = Math.max(s.bestCombo, comboMult());
+    pop("+" + pts, it.x, PY - 10, it.type === "gem" ? "#4fe0ff" : "#ffc83d");
+    if (s.streak % 5 === 0) { s.flare = Math.max(s.flare, 0.3); var m = comboMult(); say(COMBOLINES[Math.min(m, 5) - 2] || pick(HATLINES)); mood("smirk", 1); if (m >= 3 && Math.random() < 0.5) say(pick(HATLINES)); }
+    if (it.type === "gem") mood("wide", 0.6);
+    if (selected.verified) prog.questCaught++; if (selected.verified && !prog.questDone && prog.questCaught >= QUEST_GOAL) { prog.questDone = true; s.questGain = 100; say("quest done. the order clerk stamps your paper."); }
+    beep(it.type === "gem" ? 880 : 620, 0.09, "square", 0.04, it.type === "gem" ? 1320 : 780); hud();
+  }
+
+  function drawItem(it) {
+    var x = it.x, y = it.y, r = it.r; ctx.save(); ctx.translate(x, y);
+    if (it.type === "coin") { var sq = 0.7 + 0.3 * Math.abs(Math.cos(it.rot)); ctx.scale(sq, 1); ctx.shadowColor = "#6c52fb"; ctx.shadowBlur = 10; ctx.fillStyle = "#6c52fb"; ctx.beginPath(); ctx.arc(0, 0, r + 1, 0, 7); ctx.fill(); ctx.shadowBlur = 0; ctx.strokeStyle = "#1a1030"; ctx.lineWidth = 1.5; ctx.stroke(); ctx.scale(0.68, 0.68); ctx.translate(-11.78, -12); ctx.fillStyle = "#fff"; ctx.fill(MONAD); }
+    else if (it.type === "gem") { ctx.fillStyle = "#4fe0ff"; ctx.strokeStyle = "#1a1030"; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(0, -r - 2); ctx.lineTo(r + 1, 0); ctx.lineTo(0, r + 2); ctx.lineTo(-r - 1, 0); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.fillStyle = "#d8f8ff"; ctx.beginPath(); ctx.moveTo(0, -r - 2); ctx.lineTo(-r - 1, 0); ctx.lineTo(-3, 0); ctx.closePath(); ctx.fill(); }
+    else if (it.type === "heart") { ctx.fillStyle = "#ff5a8a"; ctx.font = "800 " + (r * 2.3) + "px sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText("♥", 0, 0); }
+    else { drawCast(ctx, "wraith", 0, 0, 1.35); }
+    ctx.restore();
+  }
+  function wrap(text, maxW) { var words = text.split(" "), lines = [], cur = ""; words.forEach(function (w) { var t = cur ? cur + " " + w : w; if (ctx.measureText(t).width > maxW && cur) { lines.push(cur); cur = w; } else cur = t; }); if (cur) lines.push(cur); return lines.slice(0, 3); }
+
+  function drawPlayer() {
+    var s = st, d = derived, px = Math.round(s.x);
+    if (useReal && selected.img) { ctx.save(); rr(ctx, px - PS / 2, PY - 4, PS, PS, 9); ctx.clip(); ctx.drawImage(selected.img, px - PS / 2, PY - 4, PS, PS); ctx.restore(); ctx.strokeStyle = TIER_COL[A(selected, "Tier")] || "#8b5cf6"; ctx.lineWidth = 2.5; rr(ctx, px - PS / 2, PY - 4, PS, PS, 9); ctx.stroke(); }
+    else drawChog(ctx, px, PY + 18, 3.1, selected, s.mood);
+    ctx.fillStyle = TIER_COL[A(selected, "Tier")] || "#8b5cf6"; rr(ctx, px - d.trayW / 2, PY + 52, d.trayW, 6, 3); ctx.fill();
+    ctx.fillStyle = "rgba(255,255,255,.3)"; ctx.fillRect(px - d.trayW / 2 + 3, PY + 53, d.trayW - 6, 1);
+    if (s.shield) { ctx.strokeStyle = "#4fe0ff"; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(px, PY + 24, 40, 0, 7); ctx.stroke(); }
+  }
+  function fireInten(s) { return 0.4 + 0.1 * (comboMult() - 1) + s.flare + Math.min(0.2, s.t / 300); }
+  function drawFire(s) {
+    var inten = fireInten(s), base = H - 10, n = 12, w = (W + 20) / n, layers = [["#8a1f0a", 1], ["#ff5a1f", 0.74], ["#ffc83d", 0.45]];
+    ctx.fillStyle = "#1a0d1c"; ctx.fillRect(-10, H - 12, W + 20, 12);
+    layers.forEach(function (L, li) {
+      ctx.fillStyle = L[0];
+      for (var i = 0; i < n; i++) {
+        var ph = s.t * (2.6 + li * 0.9) + i * 1.7 + li * 2.1, hgt = (22 + (Math.sin(ph) * 0.5 + 0.5) * 46 + (Math.sin(ph * 2.3) * 0.5 + 0.5) * 18) * inten * L[1];
+        var x0 = -10 + i * w, x1 = x0 + w * 1.15, sway = Math.sin(ph * 1.3) * 7;
+        ctx.beginPath(); ctx.moveTo(x0, base); ctx.quadraticCurveTo(x0 + w * 0.2 + sway * 0.5, base - hgt * 0.6, (x0 + x1) / 2 + sway, base - hgt); ctx.quadraticCurveTo(x1 - w * 0.2 + sway * 0.5, base - hgt * 0.55, x1, base); ctx.closePath(); ctx.fill();
+      }
+    });
+    var glow = ctx.createLinearGradient(0, H - 150, 0, H); glow.addColorStop(0, "rgba(255,120,30,0)"); glow.addColorStop(1, "rgba(255,120,30," + Math.min(0.35, 0.12 * inten + 0.1) + ")"); ctx.fillStyle = glow; ctx.fillRect(-10, H - 150, W + 20, 150);
+    s.embers.forEach(function (em) { ctx.globalAlpha = Math.min(1, em.life); ctx.fillStyle = em.c; ctx.fillRect(em.x, em.y, 2.5, 2.5); }); ctx.globalAlpha = 1;
+  }
+  function draw() {
+    var s = st, ox = s.shake ? (Math.random() - 0.5) * 8 : 0; ctx.save(); ctx.translate(ox, 0);
+    var g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, "#1a1250"); g.addColorStop(0.65, "#2a1530"); g.addColorStop(1, "#4a1a10"); ctx.fillStyle = g; ctx.fillRect(-10, 0, W + 20, H);
+    s.stars.forEach(function (q) { q.y += q.z * 0.6 * (s.slow > 0 ? 0.4 : 1); if (q.y > H) { q.y = 0; q.x = Math.random() * W; } ctx.fillStyle = "rgba(220,210,255," + (0.25 + q.z * 0.5) + ")"; ctx.fillRect(q.x, q.y, 2, 2); });
+    drawFire(s);
+    s.items.forEach(drawItem);
+    s.shots.forEach(function (sh) {
+      var gr = ctx.createRadialGradient(sh.x, sh.y, 1, sh.x, sh.y, sh.r * 2.2); gr.addColorStop(0, "#fff6b0"); gr.addColorStop(0.4, "#ff9a3d"); gr.addColorStop(1, "rgba(255,70,20,0)");
+      ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(sh.x, sh.y, sh.r * 2.2, 0, 7); ctx.fill();
+      ctx.fillStyle = "#ff5a1f"; ctx.beginPath(); ctx.moveTo(sh.x - sh.r * 0.8, sh.y + sh.r * 0.4); ctx.lineTo(sh.x, sh.y + sh.r * 3.2); ctx.lineTo(sh.x + sh.r * 0.8, sh.y + sh.r * 0.4); ctx.closePath(); ctx.fill();
+    });
+    $("fireFill").style.width = Math.max(0, Math.min(100, (1 - s.fireT / derived.fireCd) * 100)) + "%";
+    drawPlayer();
+    ctx.font = "800 16px Baloo 2, sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
+    s.pops.forEach(function (p) { ctx.globalAlpha = Math.min(1, p.life * 2); ctx.fillStyle = p.c; ctx.fillText(p.text, p.x, p.y); }); ctx.globalAlpha = 1;
+    if (s.say) {
+      ctx.font = "700 13px Nunito, sans-serif"; ctx.textAlign = "left"; var lines = wrap(s.say.text, W - 92), bh = lines.length * 16 + 14;
+      ctx.globalAlpha = Math.min(1, s.say.life * 2); ctx.fillStyle = "rgba(37,26,86,.94)"; rr(ctx, 10, 10, W - 20, Math.max(40, bh), 12); ctx.fill(); ctx.strokeStyle = "#3b3270"; ctx.lineWidth = 2; ctx.stroke();
+      drawLogo(ctx, 32, 28, 17); ctx.fillStyle = "#f3eeff"; lines.forEach(function (ln, i) { ctx.fillText(ln, 60, 28 + i * 16); }); ctx.globalAlpha = 1;
+    }
+    ctx.restore();
+  }
+  function loop(ts) { if (!st || st.over) return; var dt = Math.min(0.05, (ts - last) / 1000 || 0); last = ts; update(dt); if (!st.over) { draw(); raf = requestAnimationFrame(loop); } }
+
+  function startRun() {
+    if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+    if (AC && AC.state === "suspended") { try { AC.resume(); } catch (e) {} }
+    prog = loadProg(selected); loadSel(selected); if (!unlocked(alterOf(selAlter), selected)) selAlter = "plain"; runDare = selDare; derived = applyAlter(derive(selected));
+    $("over").hidden = true; show("play"); newRun(); draw();
+    cancelAnimationFrame(raf); last = performance.now(); raf = requestAnimationFrame(loop); beep(440, 0.12, "square", 0.05, 660);
+  }
+
+  /* ================= end of run + score card ================= */
+  function checkOf(tok, score) { return (hash((tok || 0) + ":" + score + ":chog") % 1296).toString(36).toUpperCase().padStart(2, "0"); }
+  function challengeCode(tok, score) { return "CHOG-" + (tok || 0) + "-" + score + "-" + checkOf(tok, score); }
+  function drawCard(canvas, ch, d, info) {
+    var w = 300, h = 400; canvas.width = w; canvas.height = h; var c = canvas.getContext("2d"), col = TIER_COL[A(ch, "Tier")] || "#8b5cf6";
+    var g = c.createLinearGradient(0, 0, 0, h); g.addColorStop(0, "#251a56"); g.addColorStop(1, "#120b2e"); c.fillStyle = g; rr(c, 0, 0, w, h, 18); c.fill(); c.strokeStyle = col; c.lineWidth = 6; rr(c, 3, 3, w - 6, h - 6, 16); c.stroke();
+    c.save(); rr(c, 20, 20, 260, 190, 12); c.clip();
+    var g2 = c.createLinearGradient(0, 0, 260, 190); g2.addColorStop(0, "#2a1a6b"); g2.addColorStop(1, "#173a6b"); c.fillStyle = g2; c.fillRect(20, 20, 260, 190);
+    if (useReal && ch.img && ch.verified) c.drawImage(ch.img, 20, -5, 260, 260); else drawChog(c, 150, 132, 6.2, ch, "smirk");
+    c.restore();
+    c.fillStyle = "#f3eeff"; c.textAlign = "left"; c.font = "800 20px Baloo 2, sans-serif"; c.fillText(ch.name.length > 24 ? ch.name.slice(0, 23) + "…" : ch.name, 22, 236);
+    c.fillStyle = col; c.font = "800 13px Nunito, sans-serif"; c.fillText((A(ch, "Tier") || "Common").toUpperCase() + "  ·  LEVEL " + info.level + (ch.verified ? "  ·  VERIFIED OWNER" : ""), 22, 256);
+    c.fillStyle = "#fff"; c.font = "800 52px Baloo 2, sans-serif"; c.fillText(String(info.score), 22, 312);
+    c.fillStyle = "#aaa1d8"; c.font = "700 12px Nunito, sans-serif"; c.fillText("SCORE  ·  BEST COMBO x" + info.combo + "  ·  STREAK " + info.streak + "d", 22, 332);
+    c.fillText(ABIL[d.abil].n.toUpperCase() + "  ·  " + (info.alter ? info.alter.toUpperCase() : "PLAIN CHOG"), 22, 350);
+    c.fillText("M" + d.might + "  C" + d.cunning + "  CH" + d.charm + (info.dare ? "  ·  " + (info.dare.indexOf("complete") > -1 ? "DARE DONE" : "DARE FAILED") : ""), 22, 366);
+    c.fillStyle = "#6d63a8"; c.font = "700 10px Nunito, sans-serif"; c.fillText(GAME_NAME.toUpperCase() + " · UNOFFICIAL FAN GAME · " + info.code, 22, 388);
+  }
+  function endRun() {
+    var s = st, d = derived; s.over = true; cancelAnimationFrame(raf); draw();
+    var dareMsg = "", dr = DARES.filter(function (x) { return x.id === runDare; })[0];
+    if (dr && dr.check) { if (dr.check(s)) { var bonus = Math.round(s.score * dr.bonus); s.score += bonus; dareMsg = "dare complete: " + dr.name + " +" + bonus; } else dareMsg = "dare failed: " + dr.name; }
+    var prevBest = selected.verified ? prog.best : sessionBest, newBest = s.score > prevBest; if (newBest) prog.best = s.score; sessionBest = Math.max(sessionBest, s.score);
+    var xpGain = selected.verified ? Math.floor(s.score / 8) + s.questGain : 0; prog.xp += xpGain; prog.runs++;
+    var info = { alter: runAlterName, dare: dareMsg, score: s.score, combo: s.bestCombo, streak: prog.lastDay === today() ? prog.streak : 0, level: levelOf(prog.xp), code: challengeCode(selected.tokenId, Math.max(prog.best, sessionBest)) };
+    saveProg(selected, prog); beep(300, 0.4, "triangle", 0.07, 90);
+    var ov = $("over"); ov.hidden = false;
+    ov.innerHTML = '<h2>' + (newBest ? "new best!" : "run over") + '</h2><p class="small muted">hold tight. no excuses.</p><div class="cardwrap" style="width:100%"><canvas id="cardCv"></canvas></div>' +
+      '<p class="small muted">' + (challenge ? (s.score > challenge.score ? "challenge beaten! " : "challenge: " + (challenge.score - s.score) + " points to go. ") : "") + (runAlterName ? "alter ego: " + esc(runAlterName) + ". " : "") + (dareMsg ? esc(dareMsg) + "." : "") + '</p><p class="small muted">' + (selected.verified ? "+" + xpGain + " xp" + (s.questGain ? " (quest bonus)" : "") : "demo run. connect a wallet that holds a chog to save xp and streaks") + (s.burned ? " · burned " + s.burned + " wraith" + (s.burned > 1 ? "s" : "") : "") + (selected.verified ? " · level " + info.level + (prog.lastDay === today() ? "" : " · tip: check in on the chog page for a score boost") : "") + '</p>' +
+      '<div class="row" style="justify-content:center"><button id="again" class="hot" type="button">Play again</button><button id="saveCard" class="alt" type="button">Save card</button></div>' +
+      '<div class="row" style="justify-content:center"><button id="copyCode" class="alt" type="button">Copy challenge link</button><button id="toChog" class="alt" type="button">Back to chog</button></div>' +
+      '<p class="small muted" id="ovNote">challenge code: ' + info.code + "</p>";
+    drawCard($("cardCv"), selected, d, info);
+    $("again").onclick = startRun; $("toChog").onclick = function () { openSheet(selected); };
+    $("saveCard").onclick = function () { try { $("cardCv").toBlob(function (b) { var a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "chog-no-excuses-card.png"; a.click(); }); } catch (e) { $("ovNote").textContent = "couldn't save the card here. take a screenshot instead."; } };
+    $("copyCode").onclick = function () {
+      var n = $("ovNote"), web = location.protocol === "http:" || location.protocol === "https:", link = web ? location.origin + location.pathname + "#c=" + info.code : info.code;
+      try { navigator.clipboard.writeText(link).then(function () { n.textContent = "copied. send it to a friend: " + link; }, function () { n.textContent = "copy failed. share this code: " + info.code; }); } catch (e) { n.textContent = "share this code: " + info.code; }
+    };
+  }
+
+  /* ================= compare ================= */
+  $("cmpForm").addEventListener("submit", function (e) {
+    e.preventDefault(); var m = /CHOG-(\d+)-(\d+)-([0-9A-Z]{2})/i.exec($("cmpInput").value.replace(/\s/g, "")), out = $("cmpOut");
+    if (!m) { out.textContent = "that doesn't look like a challenge link or code."; return; }
+    var tok = parseInt(m[1], 10), sc = parseInt(m[2], 10);
+    if (checkOf(tok, sc) !== m[3].toUpperCase()) { out.textContent = "that code doesn't check out. ask for a fresh one."; return; }
+    var mine = sessionBest; try { for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (k && k.indexOf("chog:") === 0) { var p = JSON.parse(localStorage.getItem(k)); if (p && p.best > mine) mine = p.best; } } } catch (x) {}
+    var who = tok ? "chog #" + tok : "a guest chog";
+    out.textContent = mine > sc ? "you beat " + who + " (" + sc + ") with " + mine + "." : mine === sc ? "a tie with " + who + " at " + sc + "." : who + " leads with " + sc + ". your best here is " + mine + ".";
+  });
+
+  /* ================= wiring ================= */
+  $("btnWallet").addEventListener("click", connectWallet);
+  $("btnGuest").addEventListener("click", function () { status("these are sample chogs, not real nfts. connect a wallet or look up a token to use a real one."); showChogs(SAMPLES); });
+  $("lookupForm").addEventListener("submit", function (e) { e.preventDefault(); var n = parseInt($("tokenInput").value, 10); if (!(n >= 1 && n <= SUPPLY)) { status("enter a token number from 1 to " + SUPPLY + "."); return; } lookup(n); });
+  $("btnBack").addEventListener("click", function () { show("home"); });
+  $("btnStart").addEventListener("click", startRun);
+  $("checkinBtn").addEventListener("click", checkin);
+  $("artReal").addEventListener("click", function () { useReal = true; lsSet("chog-art", "real"); syncArt(); });
+  $("artOrig").addEventListener("click", function () { useReal = false; lsSet("chog-art", "orig"); syncArt(); });
+  $("abil").addEventListener("click", useAbility);
+  $("fireBtn").addEventListener("click", fire);
+  $("muteBtn").addEventListener("click", function () { muted = !muted; this.textContent = muted ? "sound off" : "sound on"; });
+  function px(e) { var r = cv.getBoundingClientRect(); return (e.clientX - r.left) * (W / r.width); }
+  cv.addEventListener("pointerdown", function (e) { targetX = px(e); try { cv.setPointerCapture(e.pointerId); } catch (x) {} });
+  cv.addEventListener("pointermove", function (e) { if (e.buttons || e.pointerType === "mouse") targetX = px(e); });
+  window.addEventListener("keydown", function (e) {
+    if (e.key === " " && st && !st.over && !$("play").hidden) { e.preventDefault(); useAbility(); return; }
+    if ((e.key === "f" || e.key === "F" || e.key === "ArrowUp") && st && !st.over && !$("play").hidden) { e.preventDefault(); fire(); return; }
+    if (["ArrowLeft", "ArrowRight", "a", "d", "A", "D"].indexOf(e.key) > -1) { keys[e.key] = true; if (e.key.indexOf("Arrow") === 0) e.preventDefault(); }
+  });
+  window.addEventListener("keyup", function (e) { keys[e.key] = false; });
+  document.addEventListener("visibilitychange", function () { if (!st || st.over || $("play").hidden) return; if (document.hidden) cancelAnimationFrame(raf); else { last = performance.now(); raf = requestAnimationFrame(loop); } });
+  /* ================= guest chog builder ================= */
+  var BOPTS = {
+    Eyes: ["Normal Eye", "Anime Glass", "Heart", "Sunset visor", "Chog Viper", "Dead"],
+    Head: ["None", "Dollar Cap", "Mon Cap", "TISM Cap", "Choggie Beanie", "BTC Beanie", "Wizard Hat", "Red Headband"],
+    Mouth: ["Flat", "Smirk", "Smile"],
+    Skin: ["Cream", "Pink", "Green", "Blue", "Gold"],
+    Accessory: ["None", "Fwog", "Staff", "Trophy"],
+    Body: ["Hoodie", "Yellow 143 Jersey", "Wizard Robe"]
+  };
+  var BUILD = { name: "My Chog", Eyes: "Normal Eye", Head: "Dollar Cap", Mouth: "Smirk", Skin: "Cream", Accessory: "None", Body: "Hoodie" };
+  try { var savedBuild = JSON.parse(lsGet("chog-build") || "null"); if (savedBuild) Object.assign(BUILD, savedBuild); } catch (e) {}
+  function buildChog() {
+    var at = { Background: "Night", Base: "Origin", Skin: BUILD.Skin, Body: BUILD.Body, Mouth: BUILD.Mouth, Eyes: BUILD.Eyes, Head: BUILD.Head, Accessory: BUILD.Accessory, Form: "Chog", Tier: "Common" };
+    return { key: "custom", tokenId: null, name: (BUILD.name || "My Chog"), attrs: at, imageUrl: "", owner: null, verified: false, sample: true, custom: true, img: null };
+  }
+  function previewBuild() { portrait($("buildCanvas"), buildChog(), 300); lsSet("chog-build", JSON.stringify(BUILD)); }
+  (function initBuilder() {
+    var box = $("buildFields");
+    Object.keys(BOPTS).forEach(function (k) {
+      var lab = document.createElement("label"); lab.className = "f"; lab.textContent = k.toLowerCase();
+      var sel = document.createElement("select"); sel.id = "b-" + k;
+      BOPTS[k].forEach(function (o) { var op = document.createElement("option"); op.value = o; op.textContent = o; sel.appendChild(op); });
+      if (BOPTS[k].indexOf(BUILD[k]) < 0) BUILD[k] = BOPTS[k][0];
+      sel.value = BUILD[k];
+      sel.addEventListener("change", function () { BUILD[k] = sel.value; previewBuild(); });
+      lab.appendChild(sel); box.appendChild(lab);
+    });
+    $("buildName").value = BUILD.name;
+    $("buildName").addEventListener("input", function () { BUILD.name = this.value.trim() || "My Chog"; lsSet("chog-build", JSON.stringify(BUILD)); });
+  })();
+  $("btnCreate").addEventListener("click", function () { previewBuild(); show("builder"); });
+  $("buildBack").addEventListener("click", function () { show("home"); });
+  $("buildUse").addEventListener("click", function () { var ch = buildChog(); showChogs([ch]); openSheet(ch); });
+  /* ================= easy navigation + friend challenge link ================= */
+  var challenge = null;
+  function playNow() { openSheet(SAMPLES[2]); }
+  $("btnPlayNow").addEventListener("click", playNow);
+  $("challengePlay").addEventListener("click", playNow);
+  $("btnStart2").addEventListener("click", startRun);
+  $("quitBtn").addEventListener("click", function () { if (!st) return; st.over = true; cancelAnimationFrame(raf); openSheet(selected); });
+  (function () {
+    var raw = ""; try { raw = decodeURIComponent(location.hash + location.search); } catch (e) {}
+    var m = /CHOG-(\d+)-(\d+)-([0-9A-Z]{2})/i.exec(raw);
+    if (m && checkOf(parseInt(m[1], 10), parseInt(m[2], 10)) === m[3].toUpperCase()) {
+      challenge = { tok: parseInt(m[1], 10), score: parseInt(m[2], 10) };
+      $("challengeText").textContent = (challenge.tok ? "chog #" + challenge.tok : "a guest chog") + " scored " + challenge.score + ". can you beat it?";
+      $("challengeBanner").hidden = false;
+    }
+  })();
+  /* ================= home showcase: your chog in the fire ================= */
+  function buildFilter() {
+    var f = $("tierFilter"); if (f.dataset.built) return; f.dataset.built = "1";
+    ["All"].concat(TIERS).forEach(function (t) {
+      var b = document.createElement("button"); b.type = "button"; b.className = "alt tog"; b.style.cssText = "min-height:34px;padding:2px 12px;font-size:13px"; b.textContent = t; b.setAttribute("aria-pressed", t === tierSel ? "true" : "false");
+      b.addEventListener("click", function () { tierSel = t; Array.prototype.forEach.call(f.children, function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); }); showChogs(shown, true); });
+      f.appendChild(b);
+    });
+  }
+  var heroCv = $("heroCv"), hc = heroCv.getContext("2d"), HW = heroCv.width, HH = heroCv.height;
+  var heroIdx = 8, heroPinned = false, heroChog = SAMPLES[8], heroT = 0, heroLast = 0, heroCycle = 0, heroShots = [], heroEmbers = [], heroCoins = [], heroShotT = 0.8;
+  for (var hi = 0; hi < 8; hi++) heroCoins.push({ x: Math.random() * HW, y: Math.random() * HH, vy: 16 + Math.random() * 22, rot: Math.random() * 6, s: 0.8 + Math.random() * 0.8 });
+  function setHero(ch, pin) {
+    heroChog = ch; if (pin) heroPinned = true;
+    var col = TIER_COL[A(ch, "Tier")] || "#8b5cf6";
+    $("heroName").textContent = ch.name;
+    $("heroInfo").innerHTML = '<span style="color:' + col + '">' + esc((A(ch, "Tier") || "Common").toUpperCase()) + "</span> · " + esc([A(ch, "Head"), A(ch, "Eyes")].filter(function (x) { return x && x !== "None"; }).join(" · "));
+    if (ch.imageUrl && !ch.img) loadImage(ch.imageUrl).then(function (im) { if (im) ch.img = im; });
+  }
+  function drawHero(dt) {
+    var c = hc, col = TIER_COL[A(heroChog, "Tier")] || "#8b5cf6", cx = HW / 2, cy = HH * 0.46 + Math.sin(heroT * 2) * 6;
+    var g = c.createLinearGradient(0, 0, 0, HH); g.addColorStop(0, "#1a1250"); g.addColorStop(0.6, "#2a1530"); g.addColorStop(1, "#5a2410"); c.fillStyle = g; c.fillRect(0, 0, HW, HH);
+    var ag = c.createRadialGradient(cx, HH * 0.5, 10, cx, HH * 0.5, HH * 0.5); ag.addColorStop(0, col + "88"); ag.addColorStop(1, col + "00"); c.fillStyle = ag; c.fillRect(0, 0, HW, HH);
+    heroCoins.forEach(function (k) {
+      k.y += k.vy * dt; k.rot += dt * 2.5; if (k.y > HH + 20) { k.y = -20; k.x = Math.random() * HW; }
+      c.save(); c.translate(k.x, k.y); c.scale(k.s * (0.7 + 0.3 * Math.abs(Math.cos(k.rot))), k.s); c.shadowColor = "#6c52fb"; c.shadowBlur = 12; c.fillStyle = "#6c52fb"; c.beginPath(); c.arc(0, 0, 13, 0, 7); c.fill(); c.shadowBlur = 0; c.strokeStyle = "#1a1030"; c.lineWidth = 1.5; c.stroke(); c.scale(0.68, 0.68); c.translate(-11.78, -12); c.fillStyle = "#fff"; c.fill(MONAD); c.restore();
+    });
+    var inten = 1 + 0.15 * Math.sin(heroT * 1.7), base = HH - 4, n = 18, w = (HW + 20) / n;
+    [["#8a1f0a", 1], ["#ff5a1f", 0.74], ["#ffc83d", 0.45]].forEach(function (L, li) {
+      c.fillStyle = L[0];
+      for (var i = 0; i < n; i++) {
+        var ph = heroT * (2.6 + li * 0.9) + i * 1.7 + li * 2.1, hgt = (40 + (Math.sin(ph) * 0.5 + 0.5) * 80 + (Math.sin(ph * 2.3) * 0.5 + 0.5) * 30) * inten * L[1], x0 = -10 + i * w, x1 = x0 + w * 1.15, sway = Math.sin(ph * 1.3) * 10;
+        c.beginPath(); c.moveTo(x0, base); c.quadraticCurveTo(x0 + w * 0.2 + sway * 0.5, base - hgt * 0.6, (x0 + x1) / 2 + sway, base - hgt); c.quadraticCurveTo(x1 - w * 0.2 + sway * 0.5, base - hgt * 0.55, x1, base); c.closePath(); c.fill();
+      }
+    });
+    if (useReal && heroChog.img) { var S = 250; c.save(); c.shadowColor = col; c.shadowBlur = 24; rr(c, cx - S / 2, cy - S / 2 + 10, S, S, 18); c.clip(); c.drawImage(heroChog.img, cx - S / 2, cy - S / 2 + 10, S, S); c.restore(); }
+    else drawChog(c, cx, cy + 6, 10, heroChog, Math.floor(heroT) % 7 === 3 ? "smirk" : "normal");
+    heroShotT -= dt; if (heroShotT <= 0) { heroShotT = 1.6; heroShots.push({ x: cx + 80, y: HH * 0.52, vx: 420 }); }
+    for (var s = heroShots.length - 1; s >= 0; s--) {
+      var sh = heroShots[s]; sh.x += sh.vx * dt; if (Math.random() < 0.9) heroEmbers.push({ x: sh.x, y: sh.y + 4, vx: -30 - Math.random() * 40, vy: (Math.random() - 0.5) * 50, life: 0.5 + Math.random() * 0.4, c: Math.random() < 0.5 ? "#ffb347" : "#ffe08a" });
+      var gr = c.createRadialGradient(sh.x, sh.y, 1, sh.x, sh.y, 20); gr.addColorStop(0, "#fff6b0"); gr.addColorStop(0.4, "#ff9a3d"); gr.addColorStop(1, "rgba(255,70,20,0)"); c.fillStyle = gr; c.beginPath(); c.arc(sh.x, sh.y, 20, 0, 7); c.fill();
+      if (sh.x > HW + 30) heroShots.splice(s, 1);
+    }
+    if (Math.random() < dt * 70) heroEmbers.push({ x: Math.random() * HW, y: HH - 6, vx: (Math.random() - 0.5) * 30, vy: -(50 + Math.random() * 120), life: 1 + Math.random() * 1.2, c: Math.random() < 0.5 ? "#ffb347" : "#ffe08a" });
+    for (var e = heroEmbers.length - 1; e >= 0; e--) { var em = heroEmbers[e]; em.x += em.vx * dt; em.y += em.vy * dt; em.life -= dt; if (em.life <= 0) { heroEmbers.splice(e, 1); continue; } c.globalAlpha = Math.min(1, em.life * 2); c.fillStyle = em.c; c.fillRect(em.x, em.y, 3, 3); }
+    c.globalAlpha = 1;
+  }
+  function heroFrame(ts) {
+    var dt = Math.min(0.05, (ts - heroLast) / 1000 || 0); heroLast = ts;
+    if (!$("home").hidden && !document.hidden) {
+      heroT += dt; drawHero(dt);
+      if (!heroPinned) { heroCycle += dt; if (heroCycle > 4.5) { heroCycle = 0; heroIdx = (heroIdx + 1) % SAMPLES.length; setHero(SAMPLES[heroIdx], false); } }
+    }
+    requestAnimationFrame(heroFrame);
+  }
+  setHero(SAMPLES[8], false); showChogs(SAMPLES, true); requestAnimationFrame(heroFrame);
+  renderCast();
+})();
+</script>
+</body>
+</html>
