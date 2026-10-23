@@ -16,6 +16,8 @@ An unofficial fan game for Chogathon 2026. Your Chog Genesis NFT is the characte
 - Fireball (Fire button or F): burns Rug Wraiths for points. Recharge time comes from might and tier. A wizard hat makes fireballs pierce. Reckless fires faster.
 - Easy start: the home screen has four clear choices (Play now, Use my Chog, Pick a sample chog, Create a chog). The chog page has a Start button at the top and a how-to-play box. Quit is available during a run.
 - Challenges: after a run, "Copy challenge link" makes a link like https://your-site/#c=CHOG-1462-840-K7. Opening it shows a "can you beat it?" banner. Pasting a link or a code into the compare box also works.
+- When the last life ends, Chog dances on the game-over screen (an original shuffle; no official Chog dance was found).
+- The play screen hides the page header and sizes itself to the window height so the whole game fits without scrolling.
 - Guest players can build a Common-tier demo Chog with the "Create a chog" screen. Demo runs (sample Chogs, custom Chogs, token previews) are not saved.
 - Verified owners (a connected wallet that holds the Chog) keep XP, level, best score, the daily quest and the "still here?" streak on their device, and get the real-art score card.
 - Without a Chog Genesis you can only try the demo. The NFT supplies the stats, the move, the real art and the saved progress.

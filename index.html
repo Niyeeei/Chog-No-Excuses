@@ -105,6 +105,10 @@ label.f { display: grid; gap: 4px; font-size: 12px; color: var(--muted); text-tr
 .alters { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 .alters button { min-height: 48px; font-size: 14px; padding: 6px 10px; text-align: left; line-height: 1.15; }
 .alters small { display: block; font-family: var(--font-body); font-weight: 700; font-size: 11px; opacity: .85; margin-top: 2px; }
+/* while playing: hide the page header and size the whole play column to the window height so the full game is visible without scrolling */
+body.playing header, body.playing footer { display: none; }
+body.playing { padding-block: 10px 16px; }
+#play > * { width: min(100%, calc((100vh - 310px) * 0.6923)); width: min(100%, calc((100dvh - 310px) * 0.6923)); min-width: min(100%, 190px); margin-inline: auto; }
 /* play */
 .hud { display: flex; justify-content: space-between; align-items: flex-end; gap: 8px; font-family: var(--font-display); font-weight: 800; }
 .hud > div { display: flex; flex-direction: column; min-width: 0; }
@@ -134,7 +138,7 @@ canvas#game { display: block; width: 100%; height: auto; touch-action: none; }
 .steps { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
 .steps b { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: var(--purple); color: #fff; font-size: 12px; margin-right: 2px; }
 @keyframes pulse { to { filter: brightness(1.18); } }
-.cardwrap canvas { width: 100%; max-width: 300px; height: auto; border-radius: 14px; display: block; margin: 0 auto; }
+.cardwrap canvas { width: auto; max-width: 100%; max-height: 150px; height: auto; border-radius: 14px; display: block; margin: 0 auto; }
 footer { color: var(--muted); font-size: 12px; text-align: center; }
 @media (prefers-reduced-motion: reduce) { button, .abil.ready { transition: none; animation: none; } }
 </style>
@@ -627,7 +631,7 @@ footer { color: var(--muted); font-size: 12px; text-align: center; }
 
   /* ================= screens ================= */
   var selected = null, derived = null, prog = null, shown = [];
-  function show(id) { ["home", "sheet", "builder", "play"].forEach(function (s) { $(s).hidden = s !== id; }); window.scrollTo(0, 0); }
+  function show(id) { ["home", "sheet", "builder", "play"].forEach(function (s) { $(s).hidden = s !== id; }); document.body.classList.toggle("playing", id === "play"); window.scrollTo(0, 0); }
 
   function renderCast() {
     var info = [["zero", "Prototype Zero", "your guide. leftover of the failed experiment."], ["clerk", "Order Clerk", "hands out daily quests and ranks."], ["wraith", "Rug Wraith", "steals lives. made of pulled rugs."], ["logo", "Chog", "the voice of the game. catchphrases included."]];
@@ -739,7 +743,7 @@ footer { color: var(--muted); font-size: 12px; text-align: center; }
   function pop(text, x, y, color) { st.pops.push({ text: text, x: x, y: y, c: color, life: 0.8 }); }
 
   function spawn() {
-    var s = st, d = derived, pB = Math.min((0.12 + s.t * 0.003 + d.wraithAdd) * d.wraithMul, 0.4), r = Math.random(), type, pH = 0.02 * d.heartWeight, pG = 0.12 * d.gemWeight;
+    var s = st, d = derived, pB = Math.min((0.16 + s.t * 0.004 + d.wraithAdd) * d.wraithMul, 0.4), r = Math.random(), type, pH = 0.02 * d.heartWeight, pG = 0.12 * d.gemWeight;
     if (s.t > 4 && r < pB) type = "wraith"; else if (r < pB + pH) type = "heart"; else if (r < pB + pH + pG) type = "gem"; else type = "coin";
     s.items.push({ type: type, x: 22 + Math.random() * (W - 44), y: -22, vy: 130 + s.t * 3.2 + Math.random() * 40, rot: Math.random() * 6, r: 12 });
   }
@@ -905,6 +909,43 @@ footer { color: var(--muted); font-size: 12px; text-align: center; }
     c.fillText("M" + d.might + "  C" + d.cunning + "  CH" + d.charm + (info.dare ? "  ·  " + (info.dare.indexOf("complete") > -1 ? "DARE DONE" : "DARE FAILED") : ""), 22, 366);
     c.fillStyle = "#6d63a8"; c.font = "700 10px Nunito, sans-serif"; c.fillText(GAME_NAME.toUpperCase() + " · UNOFFICIAL FAN GAME · " + info.code, 22, 388);
   }
+  /* game-over dance: an original shuffle (bounce on the beat, sway, waving arms, a spin every 4th beat). I found no official Chog dance online. */
+  function startDance(cv) {
+    var c = cv.getContext("2d"), W = cv.width, H = cv.height, t0 = performance.now(), embers = [];
+    [523, 659, 784, 1047].forEach(function (f, i) { setTimeout(function () { beep(f, 0.12, "square", 0.04); }, i * 130); });
+    function frame(ts) {
+      if (!document.body.contains(cv) || $("over").hidden) return;
+      var t = (ts - t0) / 1000; c.clearRect(0, 0, W, H);
+      var base = H - 2;
+      [["#8a1f0a", 1], ["#ff5a1f", 0.7], ["#ffc83d", 0.4]].forEach(function (L, li) {
+        c.fillStyle = L[0];
+        for (var i = 0; i < 10; i++) {
+          var ph = t * (3 + li) + i * 1.7 + li * 2, hgt = (14 + (Math.sin(ph) * 0.5 + 0.5) * 30) * L[1], x0 = i * (W / 9) - 8, x1 = x0 + W / 9 * 1.2;
+          c.beginPath(); c.moveTo(x0, base); c.quadraticCurveTo(x0 + 4, base - hgt * 0.6, (x0 + x1) / 2 + Math.sin(ph) * 4, base - hgt); c.quadraticCurveTo(x1 - 4, base - hgt * 0.55, x1, base); c.closePath(); c.fill();
+        }
+      });
+      if (Math.random() < 0.5) embers.push({ x: Math.random() * W, y: H - 6, vy: -(30 + Math.random() * 60), life: 1 });
+      for (var e = embers.length - 1; e >= 0; e--) { var em = embers[e]; em.y += em.vy * 0.016; em.life -= 0.02; if (em.life <= 0) { embers.splice(e, 1); continue; } c.globalAlpha = em.life; c.fillStyle = "#ffb347"; c.fillRect(em.x, em.y, 2.5, 2.5); }
+      c.globalAlpha = 1;
+      var beat = t * 5, bounce = Math.abs(Math.sin(beat)) * 12, sway = Math.sin(beat / 2) * 0.16, cyc = t % 4, sx = cyc > 3.4 ? Math.cos((cyc - 3.4) / 0.6 * Math.PI * 2) : 1;
+      var u = H / 40, cx = W / 2, cy = H * 0.5 - bounce;
+      c.save(); c.translate(cx, H - 10); c.rotate(sway); c.scale(Math.abs(sx) < 0.08 ? 0.08 : sx, 1 - 0.05 * Math.abs(Math.cos(beat))); c.translate(-cx, -(H - 10));
+      if (useReal && selected.img && selected.verified) { var S = H * 0.62; c.drawImage(selected.img, cx - S / 2, cy - S * 0.5, S, S); }
+      else {
+        var wave = Math.sin(beat * 2) * 0.9;
+        [[-1, -2.2 + wave], [1, -0.94 - wave]].forEach(function (a) {
+          var x1 = cx + a[0] * 6 * u, y1 = cy + 9 * u, x2 = x1 + Math.cos(a[1]) * 9 * u, y2 = y1 + Math.sin(a[1]) * 9 * u;
+          c.lineCap = "round"; c.strokeStyle = "#1a1030"; c.lineWidth = 3.4 * u; c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.stroke();
+          c.strokeStyle = "#6d4bd8"; c.lineWidth = 2.2 * u; c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.stroke();
+          c.fillStyle = skinColor(selected); c.strokeStyle = "#1a1030"; c.lineWidth = 1; c.beginPath(); c.arc(x2, y2, 1.5 * u, 0, 7); c.fill(); c.stroke();
+        });
+        drawChog(c, cx, cy, u, selected, "smirk");
+      }
+      c.restore(); requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+
   function endRun() {
     var s = st, d = derived; s.over = true; cancelAnimationFrame(raf); draw();
     var dareMsg = "", dr = DARES.filter(function (x) { return x.id === runDare; })[0];
@@ -914,12 +955,12 @@ footer { color: var(--muted); font-size: 12px; text-align: center; }
     var info = { alter: runAlterName, dare: dareMsg, score: s.score, combo: s.bestCombo, streak: prog.lastDay === today() ? prog.streak : 0, level: levelOf(prog.xp), code: challengeCode(selected.tokenId, Math.max(prog.best, sessionBest)) };
     saveProg(selected, prog); beep(300, 0.4, "triangle", 0.07, 90);
     var ov = $("over"); ov.hidden = false;
-    ov.innerHTML = '<h2>' + (newBest ? "new best!" : "run over") + '</h2><p class="small muted">hold tight. no excuses.</p><div class="cardwrap" style="width:100%"><canvas id="cardCv"></canvas></div>' +
+    ov.innerHTML = '<canvas id="danceCv" width="280" height="200" style="width:140px;height:100px;flex:none" aria-label="Chog dancing"></canvas><h2>' + (newBest ? "new best!" : "run over") + '</h2><p class="small muted">hold tight. no excuses.</p><div class="cardwrap" style="width:100%"><canvas id="cardCv"></canvas></div>' +
       '<p class="small muted">' + (challenge ? (s.score > challenge.score ? "challenge beaten! " : "challenge: " + (challenge.score - s.score) + " points to go. ") : "") + (runAlterName ? "alter ego: " + esc(runAlterName) + ". " : "") + (dareMsg ? esc(dareMsg) + "." : "") + '</p><p class="small muted">' + (selected.verified ? "+" + xpGain + " xp" + (s.questGain ? " (quest bonus)" : "") : "demo run. connect a wallet that holds a chog to save xp and streaks") + (s.burned ? " · burned " + s.burned + " wraith" + (s.burned > 1 ? "s" : "") : "") + (selected.verified ? " · level " + info.level + (prog.lastDay === today() ? "" : " · tip: check in on the chog page for a score boost") : "") + '</p>' +
       '<div class="row" style="justify-content:center"><button id="again" class="hot" type="button">Play again</button><button id="saveCard" class="alt" type="button">Save card</button></div>' +
       '<div class="row" style="justify-content:center"><button id="copyCode" class="alt" type="button">Copy challenge link</button><button id="toChog" class="alt" type="button">Back to chog</button></div>' +
       '<p class="small muted" id="ovNote">challenge code: ' + info.code + "</p>";
-    drawCard($("cardCv"), selected, d, info);
+    drawCard($("cardCv"), selected, d, info); startDance($("danceCv"));
     $("again").onclick = startRun; $("toChog").onclick = function () { openSheet(selected); };
     $("saveCard").onclick = function () { try { $("cardCv").toBlob(function (b) { var a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "chog-no-excuses-card.png"; a.click(); }); } catch (e) { $("ovNote").textContent = "couldn't save the card here. take a screenshot instead."; } };
     $("copyCode").onclick = function () {
